@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drivers Management - SmartAmbulance Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+
+        :root {
+            --bg-page:           #f0f5ff;
+            --surface-card:      #ffffff;
+            --surface-panel:     #ffffff;
+            --surface-header:    #47627d;
+            --surface-header-alt:#ffffff;
+            --border-soft:       #d1d5db;
+            --border-strong:     #9ca3af;
+            --shadow-soft:       0 2px 8px rgba(15,23,42,0.06);
+            --shadow-medium:     0 8px 18px rgba(15,23,42,0.10);
+            --sidebar-bg1:       #0c1a2e;
+            --sidebar-bg2:       #0f2040;
+            --sidebar-bg3:       #0a1628;
+            --card-bg:           #ffffff;
+            --card-border:       #c7d7f9;
+            --card-shadow:       0 2px 12px rgba(37,99,235,0.08);
+            --card-shadow-hover: 0 8px 24px rgba(37,99,235,0.15);
+            --accent:            #2563eb;
+            --accent-dark:       #1d4ed8;
+            --accent-pale:       #eff6ff;
+            --accent-soft:       #dbeafe;
+            --accent-border:     #93c5fd;
+            --text-primary:      #0c1a2e;
+            --text-secondary:    #1e3a5f;
+            --text-muted:        #5b7fa6;
+            --text-hint:         #93aec8;
+            --success:           #15803d;
+            --success-bg:        #f0fdf4;
+            --success-border:    #86efac;
+            --warning:           #b45309;
+            --warning-bg:        #fffbeb;
+            --warning-border:    #fcd34d;
+            --danger:            #dc2626;
+            --danger-bg:         #fff1f2;
+            --danger-border:     #fca5a5;
+            --divider:           #dbeafe;
+        }
+
+        body { background: var(--bg-page); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f5ff; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
+
+        /* ===========================  SIDEBAR  =========================== */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(170deg, var(--sidebar-bg1) 0%, var(--sidebar-bg2) 50%, var(--sidebar-bg3) 100%);
+            display: flex; flex-direction: column;
+            position: fixed; height: 100vh; overflow-y: auto; z-index: 100;
+        }
+        .sidebar-logo {
+            font-size: .95rem; font-weight: 800;
+            padding: 20px 18px 18px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            display: flex; align-items: center; gap: 11px;
+            color: white; letter-spacing: -.3px; margin-bottom: 8px;
+        }
+        .sidebar-logo .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(37,99,235,.4); flex-shrink: 0;
+        }
+        .sidebar-section-label {
+            font-size: 8px; font-weight: 800; color: rgba(255,255,255,.2);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 0 18px; margin: 10px 0 5px;
+        }
+        .sidebar-nav { flex: 1; padding: 4px 0; animation: slideInLeft .5s ease; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; margin: 1px 8px; border-radius: 9px;
+            color: rgba(255,255,255,.5); transition: all .2s ease;
+            cursor: pointer; font-weight: 600; font-size: .72rem;
+            border: 1px solid transparent; text-decoration: none;
+        }
+        .nav-item:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.08); }
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(37,99,235,.45), rgba(29,78,216,.3));
+            border-color: rgba(147,197,253,.3);
+            box-shadow: 0 2px 12px rgba(37,99,235,.2);
+        }
+        .nav-item .nav-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: rgba(255,255,255,.07);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .75rem; flex-shrink: 0;
+        }
+        .nav-item.active .nav-icon { background: rgba(37,99,235,.35); }
+        .nav-item.nav-danger { color: rgba(252,165,165,.7); }
+        .nav-item.nav-danger:hover { color: #fca5a5; background: rgba(239,68,68,.12); }
+        .nav-item.nav-danger .nav-icon { background: rgba(239,68,68,.1); }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,.07); margin: 8px 14px; }
+        .sidebar-footer { border-top: 1px solid rgba(255,255,255,.07); padding: 14px; }
+        .admin-info-card {
+            background: rgba(37,99,235,.15); border: 1px solid rgba(59,130,246,.25);
+            border-radius: 10px; padding: 12px; text-align: center;
+        }
+        .admin-avatar {
+            width: 42px; height: 42px; margin: 0 auto 8px; border-radius: 10px;
+            background: linear-gradient(135deg,#1d4ed8,#3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1rem; color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,.4);
+        }
+        .admin-name { color: white; font-weight: 700; font-size: .65rem; }
+        .admin-role { color: rgba(255,255,255,.4); font-size: .65rem; margin-bottom: 10px; }
+
+        /* ===========================  MAIN CONTENT  =========================== */
+        .main-content {
+            flex: 1; margin-left: 240px;
+            display: flex; flex-direction: column; min-height: 100vh;
+            background: var(--bg-page);
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 11px 22px; background: #0f172a;
+            border-bottom: none; box-shadow: none;
+            position: sticky; top: 0; z-index: 90;
+        }
+        .header-title { display: flex; flex-direction: column; }
+        .htitle-row { display: flex; align-items: center; gap: 10px; }
+        .htitle-main { font-size: 14px; font-weight: 700; color: #ffffff; }
+        .htitle-section { color: #475569; font-size: 12px; font-weight: 400; margin-left: 4px; }
+        .header-title .header-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg,#2563eb,#3b82f6);
+            border-radius: 9px; display: flex; align-items: center;
+            justify-content: center; color: white; font-size: .9rem;
+            box-shadow: 0 3px 10px rgba(37,99,235,.35); flex-shrink: 0;
+        }
+        .header-controls { display: flex; align-items: center; gap: 10px; }
+        .live-clock {
+            background: #1e293b; border: none;
+            padding: 6px 14px; border-radius: 8px; text-align: center;
+        }
+        .live-clock-time { color: #ffffff; display: block; font-size: 14px; font-weight: 700; line-height: 1.3; }
+        .live-clock-date { color: #64748b; font-size: 10px; }
+        .hdr-sep { width: 1px; height: 28px; background: #334155; flex-shrink: 0; }
+        .avatar-wrap { position: relative; cursor: pointer; }
+        .chip-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; font-size: 0.7rem;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.4); user-select: none;
+        }
+        .avatar-popup {
+            display: none; position: absolute; right: 0; top: calc(100% + 8px);
+            background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+            padding: 8px; min-width: 160px; z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+        .avatar-wrap.open .avatar-popup { display: block; }
+        .av-name {
+            padding: 8px 10px 6px; font-size: 0.72rem; font-weight: 700;
+            color: #cbd5e1; display: flex; align-items: center; gap: 7px;
+            border-bottom: 1px solid #334155; margin-bottom: 4px;
+        }
+        .av-logout {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 10px; border-radius: 7px; font-size: 0.72rem; font-weight: 700;
+            color: #f87171; text-decoration: none; transition: background 0.15s;
+        }
+        .av-logout:hover { background: rgba(239,68,68,0.12); }
+        .htitle-sub { display: flex; align-items: center; gap: 5px; color: #4ade80; font-size: 10px; margin-top: 3px; }
+        .htitle-sub-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+            flex-shrink: 0; animation: pulse-hdr 1.5s infinite;
+        }
+        @keyframes pulse-hdr {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.45; transform:scale(0.8); }
+        }
+
+        /* ===========================  PAGE BODY  =========================== */
+        .page-body { padding: 18px 22px; }
+
+        /* ===========================  STAT CARDS  =========================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin-bottom: 22px;
+        }
+        .stat-card {
+            background: var(--surface-card); border: 1px solid var(--border-soft);
+            padding: 16px 15px 13px; border-radius: 13px;
+            box-shadow: var(--shadow-soft);
+            transition: transform .2s ease, box-shadow .2s ease;
+            position: relative; overflow: hidden;
+            animation: fadeInUp .5s ease both;
+        }
+        .stat-card:nth-child(1) { animation-delay: .05s; }
+        .stat-card:nth-child(2) { animation-delay: .10s; }
+        .stat-card:nth-child(3) { animation-delay: .15s; }
+        .stat-card:nth-child(4) { animation-delay: .20s; }
+        .stat-card::before {
+            content:''; position: absolute; top:0;left:0;right:0;
+            height:3.5px; border-radius:13px 13px 0 0;
+        }
+        .stat-card.blue::before  { background: linear-gradient(90deg,#2563eb,#60a5fa); }
+        .stat-card.green::before { background: linear-gradient(90deg,#15803d,#4ade80); }
+        .stat-card.amber::before { background: linear-gradient(90deg,#d97706,#fbbf24); }
+        .stat-card.gray::before  { background: linear-gradient(90deg,#64748b,#94a3b8); }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-medium); border-color: var(--border-strong); }
+        .stat-badge {
+            font-size:8px; font-weight:700; padding:3px 7px; border-radius:6px;
+            position:absolute; top:14px;right:14px; border:1px solid;
+        }
+        .stat-card.blue  .stat-badge { background:#eff6ff; color:#2563eb; border-color:#93c5fd; }
+        .stat-card.green .stat-badge { background:#f0fdf4; color:#15803d; border-color:#86efac; }
+        .stat-card.amber .stat-badge { background:#fffbeb; color:#b45309; border-color:#fcd34d; }
+        .stat-card.gray  .stat-badge { background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+        .stat-icon {
+            width:38px; height:38px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1rem; margin-bottom:10px; border:1px solid;
+        }
+        .stat-card.blue  .stat-icon { background:#eff6ff; border-color:#93c5fd; color:#2563eb; }
+        .stat-card.green .stat-icon { background:#f0fdf4; border-color:#86efac; color:#16a34a; }
+        .stat-card.amber .stat-icon { background:#fffbeb; border-color:#fcd34d; color:#d97706; }
+        .stat-card.gray  .stat-icon { background:#f1f5f9; border-color:#cbd5e1; color:#64748b; }
+        .stat-label { font-size:.65rem; margin-bottom:4px; text-transform:uppercase; letter-spacing:.6px; font-weight:700; }
+        .stat-card.blue  .stat-label { color:#3b82f6; }
+        .stat-card.green .stat-label { color:#16a34a; }
+        .stat-card.amber .stat-label { color:#d97706; }
+        .stat-card.gray  .stat-label { color:#64748b; }
+        .stat-value { font-size:1.75rem; font-weight:800; line-height:1; margin-bottom:4px; }
+        .stat-card.blue  .stat-value { color:#1d4ed8; }
+        .stat-card.green .stat-value { color:#15803d; }
+        .stat-card.amber .stat-value { color:#b45309; }
+        .stat-card.gray  .stat-value { color:#475569; }
+        .stat-sub { font-size:.62rem; color:var(--text-hint); }
+
+        /* ===========================  REFRESH BAR  =========================== */
+        .refresh-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .refresh-info {
+            display: flex; align-items: center; gap: 8px;
+            font-size: .72rem; color: var(--text-muted);
+        }
+        .refresh-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #16a34a;
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(22,163,74,.5); }
+            50%       { box-shadow: 0 0 0 5px rgba(22,163,74,0); }
+        }
+        .btn-refresh {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 8px;
+            background: var(--accent-pale); border: 1px solid var(--accent-border);
+            color: var(--accent-dark); font-size: .72rem; font-weight: 700;
+            cursor: pointer; transition: all .2s ease;
+        }
+        .btn-refresh:hover { background: #dbeafe; }
+        .btn-refresh.spinning i { animation: spin .6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===========================  TABLE CARD  =========================== */
+        .table-card {
+            background: var(--surface-card); border: 1px solid var(--border-soft);
+            border-radius: 13px; box-shadow: var(--shadow-soft);
+            overflow: hidden; animation: fadeInUp .5s ease .2s both;
+        }
+        .table-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; border-bottom: 1px solid var(--border-soft);
+            background: var(--surface-header);
+        }
+        .table-card-title {
+            display: flex; align-items: center; gap: 9px;
+            font-size: .78rem; font-weight: 800; color: #f8fbff;
+            text-transform: uppercase; letter-spacing: .5px;
+        }
+        .tc-icon {
+            width: 26px; height: 26px; border-radius: 7px;
+            background: linear-gradient(135deg,#2563eb,#3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: .65rem;
+            box-shadow: 0 2px 8px rgba(37,99,235,.3);
+        }
+        .table-count-badge {
+            font-size: .7rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 20px; background: rgba(255,255,255,0.14);
+            color: #ffffff; border: 1px solid rgba(255,255,255,0.24);
+        }
+        .drivers-table { width: 100%; border-collapse: collapse; background: var(--surface-panel); }
+        .drivers-table thead th {
+            padding: 10px 14px;
+            font-size: .62rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .6px; color: #1f2937;
+            background: #ffffff; border-bottom: 1px solid var(--border-soft);
+            white-space: nowrap; text-align: left;
+        }
+        .drivers-table tbody tr { border-bottom: 1px solid var(--border-soft); transition: background .15s ease; }
+        .drivers-table tbody tr:last-child { border-bottom: none; }
+        .drivers-table tbody tr:hover { background: #eef4fb; }
+        .drivers-table tbody tr:nth-child(even) { background: #f8fafc; }
+        .drivers-table tbody tr:nth-child(even):hover { background: #eef4fb; }
+        .drivers-table tbody td { padding: 11px 14px; font-size: .74rem; color: var(--text-primary); vertical-align: middle; }
+
+        /* Driver name cell */
+        .driver-info { display: flex; align-items: center; gap: 11px; }
+        .driver-avatar {
+            width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+            background: linear-gradient(135deg,#2563eb,#60a5fa);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: .9rem; color: white;
+            box-shadow: 0 2px 8px rgba(37,99,235,.25); overflow: hidden;
+        }
+        .driver-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .driver-name { font-weight: 700; font-size: .78rem; color: var(--text-primary); }
+        .driver-username { font-size: .62rem; color: var(--text-hint); margin-top: 1px; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: .65rem; font-weight: 700; border: 1px solid;
+            white-space: nowrap;
+        }
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-available .status-dot {
+            background: #16a34a;
+            animation: pulse-available 1.8s infinite;
+        }
+        @keyframes pulse-available {
+            0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,.6); }
+            50%      { box-shadow: 0 0 0 4px rgba(22,163,74,0); }
+        }
+        .status-busy .status-dot { background: #d97706; }
+        .status-offline .status-dot { background: #94a3b8; }
+
+        .status-available { background:#f0fdf4; color:#15803d; border-color:#86efac; }
+        .status-busy      { background:#fffbeb; color:#b45309; border-color:#fcd34d; }
+        .status-offline   { background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+
+        /* Last seen */
+        .last-seen { font-size: .68rem; color: var(--text-muted); }
+
+        /* Actions */
+        .actions-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 11px; border-radius: 7px;
+            font-size: .64rem; font-weight: 700;
+            border: 1px solid; cursor: pointer;
+            transition: all .18s ease; background: transparent; white-space: nowrap;
+        }
+        .btn-view  { color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; }
+        .btn-view:hover  { background: #dbeafe; border-color: #60a5fa; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(37,99,235,.2); }
+        .btn-remove { color: #dc2626; border-color: #fca5a5; background: #fff1f2; }
+        .btn-remove:hover { background: #fee2e2; border-color: #f87171; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(220,38,38,.2); }
+        .btn-action:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+        /* Empty state */
+        .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 20px; color:var(--text-hint); }
+        .empty-state i { font-size:2.5rem; margin-bottom:12px; color:#c7d7f9; }
+        .empty-state p { font-size:.78rem; font-weight:600; }
+
+        /* ===========================  MODAL  =========================== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(7,9,25,.55);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity .25s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--surface-card); border-radius: 18px; width: 100%;
+            max-width: 680px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(7,9,25,.25);
+            transform: translateY(20px); transition: transform .25s ease;
+            border: 1px solid var(--border-soft);
+        }
+        .modal-overlay.open .modal { transform: translateY(0); }
+        .modal-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            padding: 20px 22px 16px;
+            border-bottom: 1px solid var(--border-soft);
+            background: var(--surface-header);
+            border-radius: 18px 18px 0 0;
+        }
+        .modal-driver-info { display: flex; align-items: center; gap: 14px; }
+        .modal-photo {
+            width: 60px; height: 60px; border-radius: 14px; flex-shrink: 0;
+            background: linear-gradient(135deg,#2563eb,#60a5fa);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: white; font-weight: 800;
+            box-shadow: 0 4px 12px rgba(37,99,235,.3); overflow: hidden;
+        }
+        .modal-photo img { width:100%; height:100%; object-fit:cover; }
+        .modal-driver-name { font-size: 1.05rem; font-weight: 800; color: #f8fbff; }
+        .modal-driver-sub { font-size: .72rem; color: rgba(255,255,255,0.82); margin-top: 3px; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: white; border: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: .9rem; color: var(--text-muted);
+            transition: all .2s ease; flex-shrink: 0;
+        }
+        .modal-close:hover { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+        .modal-body { padding: 20px 22px; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title {
+            font-size: .65rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .6px; color: var(--text-muted);
+            margin-bottom: 10px; padding-bottom: 6px;
+            border-bottom: 1px solid var(--divider);
+            display: flex; align-items: center; gap: 7px;
+        }
+        .modal-section-title i { color: var(--accent); }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info-row {
+            background: var(--surface-panel); border: 1px solid var(--border-soft);
+            border-radius: 9px; padding: 10px 12px;
+        }
+        .info-row .ir-label { font-size: .6rem; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+        .info-row .ir-value { font-size: .78rem; font-weight: 600; color: var(--text-primary); }
+        .info-row .ir-value.empty { color: var(--text-hint); font-weight: 400; font-style: italic; }
+        .emerg-count {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 16px; background: #fff1f2;
+            border: 1px solid #fca5a5; border-radius: 10px;
+            font-size: .85rem; font-weight: 800; color: #dc2626;
+        }
+        .attendance-grid { display: flex; flex-direction: column; gap: 7px; }
+        .att-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface-panel); border: 1px solid var(--border-soft);
+            border-radius: 8px; padding: 8px 12px;
+            font-size: .72rem;
+        }
+        .att-date { font-weight: 600; color: var(--text-secondary); }
+        .att-badge {
+            padding: 3px 9px; border-radius: 20px;
+            font-size: .62rem; font-weight: 700; border: 1px solid;
+        }
+        .att-present  { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+        .att-absent   { background: #fff1f2; color: #dc2626; border-color: #fca5a5; }
+        .att-leave    { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+        .att-pending  { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+        .att-admin    { font-size: .6rem; color: var(--text-hint); }
+        .no-attendance { font-size: .75rem; color: var(--text-hint); font-style: italic; text-align: center; padding: 14px; }
+        .modal-loading {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 48px 20px; gap: 12px;
+            color: var(--text-muted); font-size: .78rem;
+        }
+        .modal-loading .spinner {
+            width: 32px; height: 32px; border: 3px solid #dbeafe;
+            border-top-color: #2563eb; border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        .gps-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            color: var(--accent); font-weight: 700;
+            text-decoration: none; font-size: .72rem;
+            transition: color .2s;
+        }
+        .gps-link:hover { color: var(--accent-dark); text-decoration: underline; }
+
+        /* ===========================  TOAST  =========================== */
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+        .toast {
+            display:flex; align-items:center; gap:10px;
+            padding:12px 18px; border-radius:11px;
+            font-size:.78rem; font-weight:600;
+            box-shadow:0 6px 24px rgba(0,0,0,.14);
+            border:1px solid; animation:slideInToast .3s ease; max-width:320px;
+        }
+        .toast.success { background:#f0fdf4; color:#15803d; border-color:#86efac; }
+        .toast.error   { background:#fff1f2; color:#dc2626; border-color:#fca5a5; }
+        @keyframes slideInToast { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+
+        /* ===========================  ANIMATIONS  =========================== */
+        @keyframes fadeInUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideInLeft { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+        /* ===========================  RESPONSIVE  =========================== */
+        @media (max-width:1200px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
+        @media (max-width:768px)  { .sidebar{display:none;} .main-content{margin-left:0;} .stats-grid{grid-template-columns:1fr 1fr;} }
+    </style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+        <div>
+            <div>SmartAmbulance</div>
+            <div style="font-size:.6rem;font-weight:500;color:rgba(255,255,255,.35);margin-top:1px;">Admin Control Panel</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="/admin-dashboard" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
+            Dashboard
+        </a>
+        <a href="/admin-hospitals" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-hospital"></i></div>
+            Hospitals
+        </a>
+        <a href="/admin-drivers" class="nav-item active">
+            <div class="nav-icon"><i class="fas fa-id-card"></i></div>
+            Drivers
+        </a>
+        <a href="/admin-emergencies" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-ambulance"></i></div>
+            Emergencies
+        </a>
+        <a href="/admin-users" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-users"></i></div>
+            Users
+        </a>
+        <a href="/admin-reports" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
+            Reports
+        </a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">Account</div>
+        <a href="/admin-settings" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-cog"></i></div>
+            Settings
+        </a>
+        <a href="/admin-logout" class="nav-item nav-danger">
+            <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
+            Logout
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="admin-info-card">
+            <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+            <div class="admin-name">{{ admin_username }}</div>
+            <div class="admin-role">System Administrator</div>
+        </div>
+    </div>
+</aside>
+
+<!-- ========== MAIN CONTENT ========== -->
+<div class="main-content">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <div class="htitle-row">
+                <div class="header-icon"><i class="fas fa-id-card"></i></div>
+                <div>
+                    <div class="htitle-main">Drivers Management <span class="htitle-section">/ List</span></div>
+                    <div class="htitle-sub"><span class="htitle-sub-dot"></span> All systems live</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <div class="live-clock">
+                <span class="live-clock-time" id="liveClock">--:--:--</span>
+                <span class="live-clock-date" id="liveDate">Loading...</span>
+            </div>
+            <div class="hdr-sep"></div>
+            <div class="avatar-wrap" id="avatarWrap">
+                <div class="chip-avatar" onclick="document.getElementById('avatarWrap').classList.toggle('open')">{{ admin_username[0]|upper if admin_username else 'A' }}</div>
+                <div class="avatar-popup">
+                    <div class="av-name"><i class="fas fa-user-shield"></i> {{ admin_username }}</div>
+                    <a href="/admin-logout" class="av-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page body -->
+    <div class="page-body">
+
+        <!-- Page heading row -->
+        <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:1.15rem;font-weight:800;color:var(--text-primary);">Driver Registry</div>
+                <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">
+                    Real-time status of all registered drivers. Auto-refreshes every 30 seconds.
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <span class="stat-badge">TOTAL</span>
+                <div class="stat-icon"><i class="fas fa-id-card"></i></div>
+                <div class="stat-label">Total Drivers</div>
+                <div class="stat-value" id="statTotal">{{ stats.total }}</div>
+                <div class="stat-sub">All registered drivers</div>
+            </div>
+            <div class="stat-card green">
+                <span class="stat-badge">LIVE</span>
+                <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="stat-label">Available</div>
+                <div class="stat-value" id="statAvailable">{{ stats.available }}</div>
+                <div class="stat-sub">Ready and on duty</div>
+            </div>
+            <div class="stat-card amber">
+                <span class="stat-badge">LIVE</span>
+                <div class="stat-icon"><i class="fas fa-ambulance"></i></div>
+                <div class="stat-label">Busy</div>
+                <div class="stat-value" id="statBusy">{{ stats.busy }}</div>
+                <div class="stat-sub">Currently on a trip</div>
+            </div>
+            <div class="stat-card gray">
+                <span class="stat-badge">LIVE</span>
+                <div class="stat-icon"><i class="fas fa-moon"></i></div>
+                <div class="stat-label">Offline</div>
+                <div class="stat-value" id="statOffline">{{ stats.offline }}</div>
+                <div class="stat-sub">Not currently active</div>
+            </div>
+        </div>
+
+        <!-- Refresh bar -->
+        <div class="refresh-bar">
+            <div class="refresh-info">
+                <div class="refresh-dot"></div>
+                <span id="refreshLabel">Live — auto-refreshes every 30s</span>
+            </div>
+            <button class="btn-refresh" id="btnRefresh" onclick="refreshStatuses()">
+                <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh Now
+            </button>
+        </div>
+
+        <!-- Drivers Table -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <div class="table-card-title">
+                    <div class="tc-icon"><i class="fas fa-id-card"></i></div>
+                    Registered Drivers
+                </div>
+                <span class="table-count-badge" id="tableCount">{{ stats.total }} drivers</span>
+            </div>
+
+            {% if drivers %}
+            <table class="drivers-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Driver</th>
+                        <th>Phone</th>
+                        <th>Hospital</th>
+                        <th>Status</th>
+                        <th>Last Seen</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="driversTableBody">
+                {% for d in drivers %}
+                <tr id="row-{{ d.id }}">
+                    <td style="color:var(--text-hint);font-size:.68rem;font-weight:700;">{{ loop.index }}</td>
+                    <td>
+                        <div class="driver-info">
+                            <div class="driver-avatar" id="avatar-{{ d.id }}">
+                                {% if d.profile_pic %}
+                                <img src="/static/driver_photos/{{ d.profile_pic }}"
+                                     alt="{{ d.name }}"
+                                     onerror="this.parentElement.innerHTML='{{ d.name[0]|upper if d.name else 'D' }}'">
+                                {% else %}
+                                {{ d.name[0]|upper if d.name else 'D' }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="driver-name">{{ d.name or d.username }}</div>
+                                <div class="driver-username">@{{ d.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:var(--text-muted);font-size:.72rem;">
+                        {% if d.phone %}
+                        <i class="fas fa-phone" style="font-size:.62rem;margin-right:3px;"></i>{{ d.phone }}
+                        {% else %}
+                        <span style="color:var(--text-hint);">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.72rem;color:var(--text-muted);">
+                        {% if d.hospital_name %}
+                        <i class="fas fa-hospital" style="font-size:.62rem;margin-right:3px;color:#60a5fa;"></i>{{ d.hospital_name }}
+                        {% else %}
+                        <span style="color:var(--text-hint);">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td id="status-cell-{{ d.id }}">
+                        {% set s = (d.status or 'offline')|lower %}
+                        {% if s == 'available' %}
+                        <span class="status-badge status-available">
+                            <span class="status-dot"></span>Available
+                        </span>
+                        {% elif s in ('busy', 'on trip', 'responding') %}
+                        <span class="status-badge status-busy">
+                            <span class="status-dot"></span>{{ d.status }}
+                        </span>
+                        {% else %}
+                        <span class="status-badge status-offline">
+                            <span class="status-dot"></span>{{ d.status or 'Offline' }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td id="lastseen-{{ d.id }}" class="last-seen">
+                        {% if d.location_updated_at %}
+                        {{ d.location_updated_at }}
+                        {% else %}
+                        <span style="color:var(--text-hint);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn-action btn-view"
+                                    onclick="viewDriver({{ d.id }})">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="btn-action btn-remove" id="btn-remove-{{ d.id }}"
+                                    onclick="removeDriver({{ d.id }}, '{{ (d.name or d.username)|e }}')">
+                                <i class="fas fa-trash-alt"></i> Remove
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-id-card"></i>
+                <p>No drivers registered yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<!-- ========== VIEW DETAILS MODAL ========== -->
+<div class="modal-overlay" id="driverModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal" id="modalBox">
+
+        <div class="modal-header" id="modalHeader">
+            <div class="modal-driver-info">
+                <div class="modal-photo" id="modalPhoto">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="modal-driver-name" id="modalName">Loading...</div>
+                    <div class="modal-driver-sub" id="modalSub"></div>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-body" id="modalBody">
+            <div class="modal-loading">
+                <div class="spinner"></div>
+                <span>Loading driver details...</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // ===== Live Clock =====
+    function updateClock() {
+        var now = new Date();
+        document.getElementById('liveClock').textContent =
+            now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        document.getElementById('liveDate').textContent =
+            now.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric'});
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    document.addEventListener('click', function(e) {
+        var wrap = document.getElementById('avatarWrap');
+        if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+
+    // ===== All-Stats Live Sync (every 30s) =====
+    function syncAllStats() {
+        fetch('/admin-api/all-stats')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            var t = document.getElementById('statTotal');
+            if (t && d.total_drivers !== undefined) t.textContent = d.total_drivers;
+            var tc = document.getElementById('tableCount');
+            if (tc && d.total_drivers !== undefined) tc.textContent = d.total_drivers + ' drivers';
+        })
+        .catch(function() {});
+    }
+    syncAllStats();
+    setInterval(syncAllStats, 30000);
+
+    // ===== Toast =====
+    function showToast(msg, type) {
+        var c = document.getElementById('toastContainer');
+        var t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + msg;
+        c.appendChild(t);
+        setTimeout(function() { t.remove(); }, 3500);
+    }
+
+    // ===== Status badge helper =====
+    function buildStatusBadge(status) {
+        var s = (status || 'offline').toLowerCase();
+        var cls, label;
+        if (s === 'available') {
+            cls = 'status-available'; label = 'Available';
+        } else if (s === 'busy' || s === 'on trip' || s === 'responding') {
+            cls = 'status-busy'; label = status;
+        } else {
+            cls = 'status-offline'; label = status || 'Offline';
+        }
+        return '<span class="status-badge ' + cls + '"><span class="status-dot"></span>' + label + '</span>';
+    }
+
+    // ===== Auto-refresh statuses every 30s =====
+    var refreshTimer = null;
+    var nextRefresh = 30;
+
+    function scheduleRefresh() {
+        clearInterval(refreshTimer);
+        nextRefresh = 30;
+        refreshTimer = setInterval(function() {
+            nextRefresh--;
+            document.getElementById('refreshLabel').textContent =
+                'Live — auto-refreshes in ' + nextRefresh + 's';
+            if (nextRefresh <= 0) {
+                refreshStatuses();
+            }
+        }, 1000);
+    }
+
+    function refreshStatuses() {
+        var btn = document.getElementById('btnRefresh');
+        var icon = document.getElementById('refreshIcon');
+        btn.disabled = true;
+        icon.classList.add('fa-spin');
+        document.getElementById('refreshLabel').textContent = 'Refreshing...';
+
+        fetch('/admin-drivers-live')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!Array.isArray(data)) return;
+            var available = 0, busy = 0, offline = 0;
+            data.forEach(function(d) {
+                var cell = document.getElementById('status-cell-' + d.id);
+                if (cell) cell.innerHTML = buildStatusBadge(d.status);
+                var ls = document.getElementById('lastseen-' + d.id);
+                if (ls) ls.innerHTML = d.location_updated_at || '<span style="color:var(--text-hint)">—</span>';
+                var s = (d.status || '').toLowerCase();
+                if (s === 'available') available++;
+                else if (s === 'busy' || s === 'on trip' || s === 'responding') busy++;
+                else offline++;
+            });
+            document.getElementById('statAvailable').textContent = available;
+            document.getElementById('statBusy').textContent = busy;
+            document.getElementById('statOffline').textContent = offline;
+            showToast('Status updated.', 'success');
+        })
+        .catch(function() {
+            showToast('Refresh failed. Will retry shortly.', 'error');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            icon.classList.remove('fa-spin');
+            scheduleRefresh();
+        });
+    }
+
+    scheduleRefresh();
+
+    // ===== Remove Driver =====
+    function removeDriver(id, name) {
+        if (!confirm('Remove driver "' + name + '" from the system?\nThis cannot be undone.')) return;
+        var btn = document.getElementById('btn-remove-' + id);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
+
+        fetch('/admin-remove-driver/' + id, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                var row = document.getElementById('row-' + id);
+                var statusCell = document.getElementById('status-cell-' + id);
+                var isAvailable = statusCell && statusCell.querySelector('.status-available') !== null;
+                var isBusy = statusCell && statusCell.querySelector('.status-busy') !== null;
+                row.style.transition = 'opacity .3s ease';
+                row.style.opacity = '0';
+                setTimeout(function() {
+                    row.remove();
+                    var total = parseInt(document.getElementById('statTotal').textContent) - 1;
+                    document.getElementById('statTotal').textContent = Math.max(0, total);
+                    document.getElementById('tableCount').textContent = Math.max(0, total) + ' drivers';
+                    if (isAvailable) {
+                        var av = parseInt(document.getElementById('statAvailable').textContent) - 1;
+                        document.getElementById('statAvailable').textContent = Math.max(0, av);
+                    } else if (isBusy) {
+                        var bz = parseInt(document.getElementById('statBusy').textContent) - 1;
+                        document.getElementById('statBusy').textContent = Math.max(0, bz);
+                    } else {
+                        var of = parseInt(document.getElementById('statOffline').textContent) - 1;
+                        document.getElementById('statOffline').textContent = Math.max(0, of);
+                    }
+                }, 300);
+                showToast('Driver removed successfully.', 'success');
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash-alt"></i> Remove';
+                showToast(data.message || 'Removal failed.', 'error');
+            }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash-alt"></i> Remove';
+            showToast('Network error. Please try again.', 'error');
+        });
+    }
+
+    // ===== View Details Modal =====
+    function viewDriver(id) {
+        var overlay = document.getElementById('driverModal');
+        document.getElementById('modalName').textContent = 'Loading...';
+        document.getElementById('modalSub').textContent = '';
+        document.getElementById('modalPhoto').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><div class="spinner"></div><span>Loading driver details...</span></div>';
+        overlay.classList.add('open');
+
+        fetch('/admin-driver-details/' + id)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status !== 'success') {
+                document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:1.5rem;"></i><span style="color:#dc2626;">Failed to load driver details.</span></div>';
+                return;
+            }
+            var d = data.driver;
+            var att = data.attendance;
+            var emerg = data.total_emergencies;
+
+            // Header
+            document.getElementById('modalName').textContent = d.name || d.username;
+            document.getElementById('modalSub').textContent = '@' + d.username + (d.hospital_name ? ' · ' + d.hospital_name : '');
+
+            var photo = document.getElementById('modalPhoto');
+            if (d.profile_pic) {
+                photo.innerHTML = '<img src="/static/driver_photos/' + d.profile_pic + '" alt="' + (d.name || '') + '" onerror="this.parentElement.innerHTML=\'<i class=\\\"fas fa-user-tie\\\"></i>\'">';
+            } else {
+                var initials = (d.name || d.username || 'D')[0].toUpperCase();
+                photo.innerHTML = initials;
+                photo.style.fontSize = '1.6rem';
+            }
+
+            // Status badge inline
+            var s = (d.status || 'offline').toLowerCase();
+            var statusHtml = buildStatusBadge(d.status);
+
+            // GPS
+            var gpsHtml;
+            if (d.current_latitude && d.current_longitude) {
+                var mapsUrl = 'https://maps.google.com/?q=' + d.current_latitude + ',' + d.current_longitude;
+                gpsHtml = '<a class="gps-link" href="' + mapsUrl + '" target="_blank" rel="noopener noreferrer"><i class="fas fa-map-marker-alt"></i> ' + parseFloat(d.current_latitude).toFixed(5) + ', ' + parseFloat(d.current_longitude).toFixed(5) + ' <i class="fas fa-external-link-alt" style="font-size:.55rem;"></i></a>';
+            } else {
+                gpsHtml = '<span style="color:var(--text-hint);font-style:italic;font-size:.72rem;">No GPS data available</span>';
+            }
+
+            // Attendance rows
+            var attHtml = '';
+            if (att && att.length > 0) {
+                att.forEach(function(a) {
+                    var aCls = 'att-pending';
+                    var aLabel = a.status || 'Unknown';
+                    var sl = (a.status || '').toLowerCase();
+                    if (sl === 'present') aCls = 'att-present';
+                    else if (sl === 'absent') aCls = 'att-absent';
+                    else if (sl === 'leave') aCls = 'att-leave';
+                    attHtml += '<div class="att-row">'
+                        + '<span class="att-date">' + a.date + '</span>'
+                        + '<div style="display:flex;align-items:center;gap:8px;">'
+                        + '<span class="att-badge ' + aCls + '">' + aLabel + '</span>'
+                        + '<span class="att-admin">' + (a.admin_status || '') + '</span>'
+                        + '</div></div>';
+                });
+            } else {
+                attHtml = '<div class="no-attendance">No attendance records in the last 7 days.</div>';
+            }
+
+            // Body
+            document.getElementById('modalBody').innerHTML = ''
+                + '<div class="modal-section">'
+                +   '<div class="modal-section-title"><i class="fas fa-user"></i> Personal Info</div>'
+                +   '<div class="info-grid">'
+                +     infoRow('Full Name', d.name || '—')
+                +     infoRow('Username', '@' + (d.username || '—'))
+                +     infoRow('Phone', d.phone || '—')
+                +     infoRow('CNIC', d.cnic || '—')
+                +     infoRow('License', d.license || '—')
+                +     infoRow('Experience', d.experience ? d.experience + ' years' : '—')
+                +   '</div>'
+                + '</div>'
+                + '<div class="modal-section">'
+                +   '<div class="modal-section-title"><i class="fas fa-hospital"></i> Assignment</div>'
+                +   '<div class="info-grid">'
+                +     infoRow('Hospital', d.hospital_name || 'Unassigned')
+                +     infoRow('Shift', d.shift || '—')
+                +     infoRow('Ambulance', d.assigned_ambulance || '—')
+                +     '<div class="info-row"><div class="ir-label">Status</div><div class="ir-value">' + statusHtml + '</div></div>'
+                +   '</div>'
+                + '</div>'
+                + '<div class="modal-section">'
+                +   '<div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Current GPS Location</div>'
+                +   '<div style="background:#f8faff;border:1px solid var(--card-border);border-radius:9px;padding:12px 14px;">'
+                +   gpsHtml
+                +   (d.location_updated_at ? '<div style="font-size:.62rem;color:var(--text-hint);margin-top:5px;">Last updated: ' + d.location_updated_at + '</div>' : '')
+                +   '</div>'
+                + '</div>'
+                + '<div class="modal-section">'
+                +   '<div class="modal-section-title"><i class="fas fa-ambulance"></i> Emergencies Handled</div>'
+                +   '<div class="emerg-count"><i class="fas fa-fire"></i> ' + emerg + ' completed emergencies</div>'
+                + '</div>'
+                + '<div class="modal-section">'
+                +   '<div class="modal-section-title"><i class="fas fa-calendar-check"></i> Attendance — Last 7 Days</div>'
+                +   '<div class="attendance-grid">' + attHtml + '</div>'
+                + '</div>';
+        })
+        .catch(function() {
+            document.getElementById('modalBody').innerHTML = '<div class="modal-loading"><i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:1.5rem;"></i><span style="color:#dc2626;">Network error loading details.</span></div>';
+        });
+    }
+
+    function infoRow(label, value) {
+        var isEmpty = !value || value === '—';
+        return '<div class="info-row">'
+            + '<div class="ir-label">' + label + '</div>'
+            + '<div class="ir-value' + (isEmpty ? ' empty' : '') + '">' + value + '</div>'
+            + '</div>';
+    }
+
+    function closeModal() {
+        document.getElementById('driverModal').classList.remove('open');
+    }
+
+    function closeModalOnBackdrop(e) {
+        if (e.target === document.getElementById('driverModal')) closeModal();
+    }
+
+    // ESC key closes modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Login - SmartAmbulance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a0f1e;
+            --secondary-dark: #111827;
+            --accent-green: #00ff88;
+            --accent-green-dark: #00cc66;
+            --text-primary: #e8eef7;
+            --text-secondary: #a0a8b8;
+            --border-color: rgba(0, 255, 136, 0.1);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #05070c 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .pulse-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 136, 0.1);
+            animation: pulse-ring 4s infinite;
+        }
+
+        .circle-1 {
+            width: 250px;
+            height: 250px;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 350px;
+            height: 350px;
+            bottom: -150px;
+            left: -150px;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.2;
+            }
+        }
+
+        .ambulance-animation {
+            position: absolute;
+            top: 60px;
+            right: 30px;
+            opacity: 0.1;
+            font-size: 120px;
+            animation: float-ambulance 6s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes float-ambulance {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-40px) rotate(5deg);
+            }
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 510px;
+            padding: 20px;
+            z-index: 10;
+            animation: slideInUp 0.8s ease;
+        }
+        
+        .login-box {
+            width: 100%;
+            background: rgba(17, 24, 39, 0.75);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 60px 50px;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 
+                        0 0 60px rgba(0, 255, 136, 0.08),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: slideInUp 0.8s ease;
+            transition: var(--transition-smooth);
+        }
+
+        .login-box:hover {
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.7), 
+                        0 0 80px rgba(0, 255, 136, 0.12),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .logo-circle {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.25), rgba(0, 255, 136, 0.08));
+            border: 2px solid var(--accent-green);
+            border-radius: 20px;
+            font-size: 50px;
+            color: var(--accent-green);
+            animation: rotate-logo 25s linear infinite;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes rotate-logo {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .login-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .login-header h1 .ambulance-icon {
+            color: var(--accent-green);
+            margin-right: 12px;
+            animation: pulse-icon 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(0, 255, 136, 0));
+            }
+            50% {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.4));
+            }
+        }
+        
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        .form-group {
+            margin-bottom: 28px;
+        }
+        
+        .form-group label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.95;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1.5px solid rgba(0, 255, 136, 0.25);
+            color: var(--text-primary);
+            padding: 14px 18px;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-control option {
+            background: var(--secondary-dark);
+            color: var(--text-primary);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(160, 168, 184, 0.6);
+            font-weight: 400;
+        }
+        
+        .form-control:hover {
+            background: rgba(0, 0, 0, 0.45);
+            border-color: rgba(0, 255, 136, 0.35);
+        }
+        
+        .form-control:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-green);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.15),
+                        inset 0 2px 8px rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--accent-green);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition-smooth);
+            padding: 8px;
+        }
+
+        .password-toggle:hover {
+            color: var(--accent-green-dark);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-green-dark) 100%);
+            border: none;
+            color: var(--primary-dark);
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            margin-top: 15px;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.25),
+                        0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn-submit:hover::before {
+            left: 100%;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 255, 136, 0.35),
+                        0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2),
+                        0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .alert-box {
+            background: rgba(255, 51, 51, 0.12);
+            border: 1.5px solid rgba(255, 51, 51, 0.35);
+            color: #ff8888;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            animation: slideInDown 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-box i {
+            font-size: 1.3rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .alert-box span {
+            font-weight: 500;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 28px;
+        }
+        
+        .back-link a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+        }
+        
+        .back-link a:hover {
+            color: var(--accent-green-dark);
+            transform: translateX(-6px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-wrapper {
+                padding: 16px;
+            }
+
+            .login-box {
+                padding: 45px 35px;
+            }
+            
+            .login-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .logo-circle {
+                width: 85px;
+                height: 85px;
+                font-size: 42px;
+                margin-bottom: 25px;
+            }
+
+            .login-header p {
+                font-size: 0.9rem;
+            }
+
+            .ambulance-animation {
+                font-size: 80px;
+                top: 40px;
+                right: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            .form-group label {
+                font-size: 0.8rem;
+            }
+
+            .form-control {
+                padding: 13px 16px;
+                font-size: 0.9rem;
+            }
+
+            .btn-submit {
+                padding: 14px;
+                font-size: 0.95rem;
+                margin-top: 12px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-wrapper {
+                padding: 12px;
+            }
+
+            .login-box {
+                padding: 35px 25px;
+                border-radius: 18px;
+            }
+            
+            .login-header {
+                margin-bottom: 35px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+
+            .login-header p {
+                font-size: 0.85rem;
+            }
+
+            .logo-circle {
+                width: 75px;
+                height: 75px;
+                font-size: 38px;
+                margin-bottom: 20px;
+            }
+
+            .ambulance-animation {
+                font-size: 60px;
+                top: 30px;
+                right: 10px;
+                opacity: 0.08;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                font-size: 0.75rem;
+                margin-bottom: 10px;
+            }
+
+            .form-control {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+                border-radius: 10px;
+            }
+
+            .password-toggle {
+                right: 14px;
+                font-size: 1.1rem;
+                padding: 6px;
+            }
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 0.9rem;
+                margin-top: 10px;
+                border-radius: 10px;
+            }
+
+            .back-link {
+                margin-top: 22px;
+            }
+
+            .back-link a {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .login-box {
+                padding: 28px 18px;
+            }
+
+            .login-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .logo-circle {
+                width: 65px;
+                height: 65px;
+                font-size: 32px;
+            }
+
+            .form-group label {
+                font-size: 0.7rem;
+            }
+
+            .form-control {
+                padding: 11px 12px;
+                font-size: 0.85rem;
+            }
+
+            .btn-submit {
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animated">
+        <div class="pulse-circle circle-1"></div>
+        <div class="pulse-circle circle-2"></div>
+        <div class="ambulance-animation">
+            <i class="fas fa-ambulance"></i>
+        </div>
+    </div>
+
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo-circle">
+                    <i class="fas fa-car-side"></i>
+                </div>
+                <h1><span class="ambulance-icon"><i class="fas fa-ambulance"></i></span>SmartAmbulance</h1>
+                <p>Driver Portal - Emergency Response System</p>
+            </div>
+            
+            {% if error %}
+            <div class="alert-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/driver-login">
+                <div class="form-group">
+                    <label><i class="fas fa-hospital me-2"></i>Hospital</label>
+                    <select name="hospital_id" class="form-control" required>
+                        <option value="">-- Select Hospital --</option>
+                        {% for h in hospitals %}
+                        <option value="{{ h['id'] }}">{{ h['name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-id-card me-2"></i>Driver ID</label>
+                    <input type="text" class="form-control" name="username" required placeholder="DRV-001">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-lock me-2"></i>Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-control" id="passwordField" name="password" required placeholder="••••••">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+                </button>
+            </form>
+            
+            <div class="back-link">
+                <a href="/"><i class="fas fa-arrow-left"></i>Back to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword() {
+            const field = document.getElementById('passwordField');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

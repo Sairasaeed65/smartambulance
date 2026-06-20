@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SmartAmbulance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+
+        :root {
+            --bg-page:          #f0f5ff;
+            --surface-card:     #ffffff;
+            --surface-panel:    #fcfdff;
+            --surface-header:   #a8bdd6;
+            --surface-header-alt:#d9e7f5;
+            --border-soft:      #b6c2d0;
+            --border-strong:    #94a8bc;
+            --shadow-soft:      0 2px 8px rgba(15,23,42,0.06);
+            --shadow-medium:    0 8px 18px rgba(15,23,42,0.10);
+            --sidebar-bg1:      #0c1a2e;
+            --sidebar-bg2:      #0f2040;
+            --sidebar-bg3:      #0a1628;
+            --card-bg:          #ffffff;
+            --card-border:      #c7d7f9;
+            --card-shadow:      0 2px 12px rgba(37,99,235,0.08);
+            --card-shadow-hover:0 8px 24px rgba(37,99,235,0.15);
+            --accent:           #2563eb;
+            --accent-dark:      #1d4ed8;
+            --accent-pale:      #eff6ff;
+            --accent-soft:      #dbeafe;
+            --accent-border:    #93c5fd;
+            --text-primary:     #0c1a2e;
+            --text-secondary:   #1e3a5f;
+            --text-muted:       #5b7fa6;
+            --text-hint:        #93aec8;
+            --success:          #15803d;
+            --success-bg:       #f0fdf4;
+            --success-border:   #86efac;
+            --warning:          #b45309;
+            --warning-bg:       #fffbeb;
+            --warning-border:   #fcd34d;
+            --danger:           #dc2626;
+            --danger-bg:        #fff1f2;
+            --danger-border:    #fca5a5;
+            --divider:          #dbeafe;
+        }
+
+        body {
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f5ff; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
+
+        /* ===========================
+           SIDEBAR
+        =========================== */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(170deg, var(--sidebar-bg1) 0%, var(--sidebar-bg2) 50%, var(--sidebar-bg3) 100%);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 20px 18px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: white;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-logo .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-label {
+            font-size: 8px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 0 18px;
+            margin: 10px 0 5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 4px 0;
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            margin: 1px 8px;
+            border-radius: 9px;
+            color: rgba(255,255,255,0.5);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.72rem;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(37,99,235,0.45), rgba(29,78,216,0.3));
+            border-color: rgba(147,197,253,0.3);
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+        }
+
+        .nav-item .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .nav-item.active .nav-icon {
+            background: rgba(37,99,235,0.35);
+        }
+
+        .nav-item.nav-danger { color: rgba(252,165,165,0.7); }
+        .nav-item.nav-danger:hover {
+            color: #fca5a5;
+            background: rgba(239,68,68,0.12);
+        }
+        .nav-item.nav-danger .nav-icon { background: rgba(239,68,68,0.1); }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 8px 14px;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 14px;
+        }
+
+        .admin-info-card {
+            background: rgba(37,99,235,0.15);
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .admin-avatar {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 8px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+        }
+
+        .admin-name { color: white; font-weight: 700; font-size: 0.65rem; }
+        .admin-role { color: rgba(255,255,255,0.4); font-size: 0.65rem; margin-bottom: 10px; }
+
+        /* ===========================
+           MAIN CONTENT
+        =========================== */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--bg-page);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 22px;
+            background: #0f172a;
+            border-bottom: none;
+            box-shadow: none;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-title { display: flex; flex-direction: column; }
+        .htitle-row { display: flex; align-items: center; gap: 10px; }
+        .htitle-main { font-size: 14px; font-weight: 700; color: #ffffff; }
+        .htitle-section { color: #475569; font-size: 12px; font-weight: 400; margin-left: 4px; }
+
+        .header-title .header-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(37,99,235,0.35);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live-clock {
+            background: #1e293b;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .live-clock-time { color: #ffffff; display: block; font-size: 13px; font-weight: 700; line-height: 1.3; }
+        .live-clock-date { color: #475569; font-size: 10px; }
+
+        .hdr-sep { width: 1px; height: 28px; background: #334155; flex-shrink: 0; }
+
+        .avatar-wrap { position: relative; cursor: pointer; }
+
+        .chip-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; font-size: 0.7rem;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.4); user-select: none;
+        }
+
+        .avatar-popup {
+            display: none; position: absolute; right: 0; top: calc(100% + 8px);
+            background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+            padding: 8px; min-width: 160px; z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
+        .avatar-wrap.open .avatar-popup { display: block; }
+
+        .av-name {
+            padding: 8px 10px 6px; font-size: 0.72rem; font-weight: 700;
+            color: #cbd5e1; display: flex; align-items: center; gap: 7px;
+            border-bottom: 1px solid #334155; margin-bottom: 4px;
+        }
+
+        .av-logout {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 10px; border-radius: 7px; font-size: 0.72rem; font-weight: 700;
+            color: #f87171; text-decoration: none; transition: background 0.15s;
+        }
+
+        .av-logout:hover { background: rgba(239,68,68,0.12); }
+
+        .htitle-sub { display: flex; align-items: center; gap: 5px; color: #4ade80; font-size: 10px; margin-top: 3px; }
+
+        .htitle-sub-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+            flex-shrink: 0; animation: pulse-live 1.5s infinite;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.45; transform: scale(0.8); }
+        }
+
+        /* ===========================
+           DASHBOARD BODY
+        =========================== */
+        .dashboard-body {
+            padding: 18px 22px;
+        }
+
+        /* ===========================
+           STATS CARDS
+        =========================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-soft);
+            padding: 16px 15px 13px;
+            border-radius: 13px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3.5px;
+            border-radius: 13px 13px 0 0;
+        }
+
+        .stat-card.blue::before  { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+        .stat-card.green::before { background: linear-gradient(90deg, #15803d, #4ade80); }
+        .stat-card.red::before   { background: linear-gradient(90deg, #dc2626, #f87171); }
+        .stat-card.amber::before { background: linear-gradient(90deg, #d97706, #fbbf24); }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--border-strong);
+        }
+
+        .stat-badge {
+            font-size: 8px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 6px;
+            position: absolute;
+            top: 14px; right: 14px;
+            border: 1px solid;
+        }
+
+        .stat-card.blue  .stat-badge { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
+        .stat-card.green .stat-badge { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+        .stat-card.red   .stat-badge { background: #fff1f2; color: #dc2626; border-color: #fca5a5; }
+        .stat-card.amber .stat-badge { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border: 1px solid;
+        }
+
+        .stat-card.blue  .stat-icon { background: #eff6ff; border-color: #93c5fd; color: #2563eb; }
+        .stat-card.green .stat-icon { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+        .stat-card.red   .stat-icon { background: #fff1f2; border-color: #fca5a5; color: #dc2626; }
+        .stat-card.amber .stat-icon { background: #fffbeb; border-color: #fcd34d; color: #d97706; }
+
+        .stat-label {
+            font-size: 0.65rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 700;
+        }
+
+        .stat-card.blue  .stat-label { color: #3b82f6; }
+        .stat-card.green .stat-label { color: #16a34a; }
+        .stat-card.red   .stat-label { color: #ef4444; }
+        .stat-card.amber .stat-label { color: #d97706; }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-card.blue  .stat-value { color: #1d4ed8; }
+        .stat-card.green .stat-value { color: #15803d; }
+        .stat-card.red   .stat-value { color: #dc2626; }
+        .stat-card.amber .stat-value { color: #b45309; }
+        .stat-card.purple .stat-value { color: #5b21b6; }
+
+        /* Purple stat card (Total Users) */
+        .stat-card.purple::before { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+        .stat-card.purple .stat-badge { background: #faf5ff; color: #6d28d9; border-color: #c4b5fd; }
+        .stat-card.purple .stat-icon  { background: #faf5ff; border-color: #c4b5fd; color: #7c3aed; }
+        .stat-card.purple .stat-label { color: #7c3aed; }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 52px 20px;
+            color: var(--text-hint);
+        }
+        .empty-state i { font-size: 2.4rem; margin-bottom: 12px; color: #c7d7f9; }
+        .empty-state p { font-size: .8rem; font-weight: 600; }
+
+        /* Toast notifications */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px; border-radius: 11px;
+            font-size: .78rem; font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0,0,0,.14); border: 1px solid;
+            animation: slideInToast .3s ease; max-width: 320px;
+        }
+        .toast.success { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+        .toast.error   { background: #fff1f2; color: #dc2626; border-color: #fca5a5; }
+        @keyframes slideInToast { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+
+        .stat-sub {
+            font-size: 0.62rem;
+            color: var(--text-hint);
+        }
+
+        /* ===========================
+           SECTION CARDS
+        =========================== */
+        /* ===========================
+           SECTIONS GRID
+        =========================== */
+        .sections-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .section-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 13px;
+            padding: 18px;
+            box-shadow: var(--shadow-soft);
+            animation: fadeIn 0.6s ease 0.2s both;
+        }
+
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1.5px solid #7a8899;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .sec-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+        }
+
+        .sec-icon.blue   { background: #E6F1FB; color: #2a6dbb; }
+        .sec-icon.purple { background: #EEEDFE; color: #5b3fc0; }
+
+        /* ===========================
+           QUICK NAVIGATION NAVBAR
+        =========================== */
+        .qn-navbar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .qn-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            min-width: 0;
+            background: var(--surface-panel);
+            border: 1px solid var(--border-soft);
+            border-top: 3px solid transparent;
+            border-radius: 10px;
+            padding: 14px 8px 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-top-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qn-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .qn-card.blue  { border-top-color: #6ba8d6; }
+        .qn-card.green { border-top-color: #6db86d; }
+        .qn-card.red   { border-top-color: #d67474; }
+        .qn-card.purple{ border-top-color: #8e7dd6; }
+        .qn-card.orange{ border-top-color: #d4973a; }
+        .qn-card.gray  { border-top-color: #9ea8b5; }
+
+        .qn-card.blue::after   { background: #E6F1FB; }
+        .qn-card.green::after  { background: #EAF3DE; }
+        .qn-card.red::after    { background: #FCEBEB; }
+        .qn-card.purple::after { background: #EEEDFE; }
+        .qn-card.orange::after { background: #FAEEDA; }
+        .qn-card.gray::after   { background: #F1EFE8; }
+
+        .qn-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .qn-card:hover::after { opacity: 0.55; }
+
+        .qn-icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .qn-card:hover .qn-icon-box { transform: scale(1.1); }
+
+        .qn-icon-box.blue   { background: #E6F1FB; color: #2a6dbb; }
+        .qn-icon-box.green  { background: #EAF3DE; color: #3a7d2a; }
+        .qn-icon-box.red    { background: #FCEBEB; color: #b93232; }
+        .qn-icon-box.purple { background: #EEEDFE; color: #5b3fc0; }
+        .qn-icon-box.orange { background: #FAEEDA; color: #b36a00; }
+        .qn-icon-box.gray   { background: #F1EFE8; color: #6b6458; }
+
+        .qn-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+        }
+
+        .qn-desc {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===========================
+           SYSTEM SUMMARY ROWS
+        =========================== */
+        .ss-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 13px;
+            margin-bottom: 8px;
+            background: #ffffff;
+            border: 1px solid #8b9ba9;
+            border-left: 3px solid;
+            border-radius: 9px;
+            font-size: 0.72rem;
+        }
+
+        .ss-row:last-child { margin-bottom: 0; }
+        .ss-row.blue   { border-left-color: #7bb3e0; }
+        .ss-row.green  { border-left-color: #72b472; }
+        .ss-row.red    { border-left-color: #d97878; }
+        .ss-row.orange { border-left-color: #d9a355; }
+        .ss-row.teal   { border-left-color: #3aaa5c; }
+
+        .ss-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .ss-row.blue   .ss-icon { background: #E6F1FB; color: #2a6dbb; }
+        .ss-row.green  .ss-icon { background: #EAF3DE; color: #3a7d2a; }
+        .ss-row.red    .ss-icon { background: #FCEBEB; color: #b93232; }
+        .ss-row.orange .ss-icon { background: #FAEEDA; color: #b36a00; }
+        .ss-row.teal   .ss-icon { background: #e5f5ec; color: #2d8a4e; }
+
+        .ss-body { flex: 1; min-width: 0; }
+
+        .ss-label {
+            font-size: 0.61rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .ss-value {
+            font-size: 0.73rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ss-number {
+            font-size: 1.4rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-left: auto;
+            padding-left: 8px;
+        }
+
+        .ss-row.blue   .ss-number { color: #4a8fc7; }
+        .ss-row.green  .ss-number { color: #4a9a4a; }
+        .ss-row.red    .ss-number { color: #c05050; }
+        .ss-row.orange .ss-number { color: #c48830; }
+
+        .ss-status-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #2d8a4e;
+            background: #e5f5ec;
+            padding: 3px 9px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.55; transform: scale(1.5); }
+        }
+
+        .ss-pulse {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: #3aaa5c;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+
+        /* ===========================
+           ANIMATIONS
+        =========================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===========================
+           RESPONSIVE
+        =========================== */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .sections-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========== SIDEBAR =========== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+            <div>
+                <div>SmartAmbulance</div>
+                <div style="font-size:0.6rem;font-weight:500;color:rgba(255,255,255,0.35);margin-top:1px;">Admin Control Panel</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Main</div>
+
+            <a href="/admin-dashboard" class="nav-item active">
+                <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
+                Dashboard
+            </a>
+
+            <a href="/admin-hospitals" class="nav-item" id="nav-hospitals">
+                <div class="nav-icon"><i class="fas fa-hospital"></i></div>
+                Hospitals
+            </a>
+
+            <a href="/admin-drivers" class="nav-item" id="nav-drivers">
+                <div class="nav-icon"><i class="fas fa-id-card"></i></div>
+                Drivers
+            </a>
+
+            <a href="/admin-emergencies" class="nav-item" id="nav-emergencies">
+                <div class="nav-icon"><i class="fas fa-ambulance"></i></div>
+                Emergencies
+            </a>
+
+            <a href="/admin-users" class="nav-item" id="nav-users">
+                <div class="nav-icon"><i class="fas fa-users"></i></div>
+                Users
+            </a>
+
+            <a href="/admin-reports" class="nav-item">
+                <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
+                Reports
+            </a>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section-label">Account</div>
+
+            <a href="/admin-settings" class="nav-item">
+                <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                Settings
+            </a>
+
+            <a href="/admin-logout" class="nav-item nav-danger">
+                <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
+                Logout
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-info-card">
+                <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="admin-name">{{ admin_username }}</div>
+                <div class="admin-role">System Administrator</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- =========== MAIN CONTENT =========== -->
+    <div class="main-content">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <div class="htitle-row">
+                    <div class="header-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div>
+                        <div class="htitle-main">Admin Dashboard <span class="htitle-section">/ Overview</span></div>
+                        <div class="htitle-sub"><span class="htitle-sub-dot"></span> All systems live</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="live-clock">
+                    <span class="live-clock-time" id="liveClock">--:--:--</span>
+                    <span class="live-clock-date" id="liveDate">Loading...</span>
+                </div>
+                <div class="hdr-sep"></div>
+                <div class="avatar-wrap" id="avatarWrap">
+                    <div class="chip-avatar" onclick="document.getElementById('avatarWrap').classList.toggle('open')">{{ admin_username[0]|upper if admin_username else 'A' }}</div>
+                    <div class="avatar-popup">
+                        <div class="av-name"><i class="fas fa-user-shield"></i> {{ admin_username }}</div>
+                        <a href="/admin-logout" class="av-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard body -->
+        <div class="dashboard-body">
+
+            <!-- Welcome bar -->
+            <div style="margin-bottom:18px;background:#ffffff;border-bottom:3px solid #3B82F6;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-left:-22px;margin-right:-22px;margin-top:-18px;">
+                <div>
+                    <div id="greeting" style="font-size:21px;font-weight:800;color:#0f172a;">
+                        Welcome back, <span style="color:#185FA5;">Admin</span> 👋
+                    </div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:3px;">
+                        Here's a live overview of your SmartAmbulance system.
+                    </div>
+                </div>
+                <a href="/admin-logout"
+                   style="display:flex;align-items:center;gap:7px;padding:8px 16px;
+                          background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);
+                          color:#dc2626;border-radius:9px;font-size:0.75rem;font-weight:700;
+                          text-decoration:none;transition:all 0.2s ease;"
+                   onmouseover="this.style.background='rgba(239,68,68,0.15)'"
+                   onmouseout="this.style.background='rgba(239,68,68,0.08)'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
+            <!-- ====== STATS CARDS ====== -->
+            <div class="stats-grid">
+
+                <!-- Hospitals -->
+                <div class="stat-card blue">
+                    <span class="stat-badge">LIVE</span>
+                    <div class="stat-icon"><i class="fas fa-hospital"></i></div>
+                    <div class="stat-label">Total Hospitals</div>
+                    <div class="stat-value" id="statTotalHospitals">{{ stats.total_hospitals }}</div>
+                    <div class="stat-sub">Registered in system</div>
+                </div>
+
+                <!-- Drivers -->
+                <div class="stat-card green">
+                    <span class="stat-badge">LIVE</span>
+                    <div class="stat-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="stat-label">Total Drivers</div>
+                    <div class="stat-value" id="statTotalDrivers">{{ stats.total_drivers }}</div>
+                    <div class="stat-sub">
+                        <span style="color:#15803d;font-weight:700;">{{ stats.active_drivers }} active</span>
+                        &nbsp;·&nbsp;
+                        <span style="color:#dc2626;font-weight:700;">{{ stats.offline_drivers }} offline</span>
+                    </div>
+                </div>
+
+                <!-- Emergencies Today -->
+                <div class="stat-card red">
+                    <span class="stat-badge">TODAY</span>
+                    <div class="stat-icon"><i class="fas fa-ambulance"></i></div>
+                    <div class="stat-label">Emergencies Today</div>
+                    <div class="stat-value" id="statEmergenciesToday">{{ stats.emergencies_today }}</div>
+                    <div class="stat-sub">Patient requests dispatched</div>
+                </div>
+
+                <!-- Avg Response Time -->
+                <div class="stat-card amber">
+                    <span class="stat-badge">AVG</span>
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-label">Avg Response Time</div>
+                    <div class="stat-value">
+                        {% if stats.avg_response %}
+                            {{ stats.avg_response }}<span style="font-size:1rem;font-weight:600;">m</span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                    <div class="stat-sub">Minutes — dispatches today</div>
+                </div>
+
+                <!-- Total Users -->
+                <div class="stat-card purple">
+                    <span class="stat-badge">LIVE</span>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value">{{ stats.total_users }}</div>
+                    <div class="stat-sub">Registered patients</div>
+                </div>
+
+            </div>
+
+            <!-- ====== SECTION CARDS ====== -->
+            <div class="sections-grid">
+
+                <!-- Quick Navigation -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="sec-icon blue"><i class="fas fa-rocket"></i></div>
+                        Quick Navigation
+                    </div>
+
+                    <div class="qn-navbar">
+
+                        <a href="/admin-hospitals" class="qn-card blue">
+                            <div class="qn-icon-box blue"><i class="fas fa-hospital"></i></div>
+                            <div class="qn-title">Hospitals</div>
+                            <div class="qn-desc">Manage &amp; approve</div>
+                        </a>
+
+                        <a href="/admin-drivers" class="qn-card green">
+                            <div class="qn-icon-box green"><i class="fas fa-id-card"></i></div>
+                            <div class="qn-title">Drivers</div>
+                            <div class="qn-desc">Monitor &amp; assign</div>
+                        </a>
+
+                        <a href="/admin-emergencies" class="qn-card red">
+                            <div class="qn-icon-box red"><i class="fas fa-ambulance"></i></div>
+                            <div class="qn-title">Emergencies</div>
+                            <div class="qn-desc">Live requests</div>
+                        </a>
+
+                        <a href="/admin-users" class="qn-card purple">
+                            <div class="qn-icon-box purple"><i class="fas fa-users"></i></div>
+                            <div class="qn-title">Users</div>
+                            <div class="qn-desc">Registered patients</div>
+                        </a>
+
+                        <a href="/admin-reports" class="qn-card orange">
+                            <div class="qn-icon-box orange"><i class="fas fa-chart-bar"></i></div>
+                            <div class="qn-title">Reports</div>
+                            <div class="qn-desc">Analytics &amp; trends</div>
+                        </a>
+
+                        <a href="/admin-settings" class="qn-card gray">
+                            <div class="qn-icon-box gray"><i class="fas fa-cog"></i></div>
+                            <div class="qn-title">Settings</div>
+                            <div class="qn-desc">System config</div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <!-- System Summary -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="sec-icon purple"><i class="fas fa-info-circle"></i></div>
+                        System Summary
+                    </div>
+
+                    <div class="ss-row blue">
+                        <div class="ss-icon"><i class="fas fa-hospital-alt"></i></div>
+                        <div class="ss-body">
+                            <div class="ss-label">Registered Hospitals</div>
+                            <div class="ss-value">Active in dispatch network</div>
+                        </div>
+                        <div class="ss-number" id="ssTotalHospitals">{{ stats.total_hospitals }}</div>
+                    </div>
+
+                    <div class="ss-row green">
+                        <div class="ss-icon"><i class="fas fa-user-md"></i></div>
+                        <div class="ss-body">
+                            <div class="ss-label">Driver Fleet</div>
+                            <div class="ss-value">{{ stats.active_drivers }} available &nbsp;·&nbsp; {{ stats.offline_drivers }} offline</div>
+                        </div>
+                        <div class="ss-number" id="ssTotalDrivers">{{ stats.total_drivers }}</div>
+                    </div>
+
+                    <div class="ss-row red">
+                        <div class="ss-icon"><i class="fas fa-fire"></i></div>
+                        <div class="ss-body">
+                            <div class="ss-label">Emergency Activity — Today</div>
+                            <div class="ss-value">
+                                {% if stats.emergencies_today > 0 %}
+                                    {{ stats.emergencies_today }} request(s) received
+                                {% else %}
+                                    No requests today
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="ss-number" id="ssEmergenciesToday">{{ stats.emergencies_today }}</div>
+                    </div>
+
+                    <div class="ss-row orange">
+                        <div class="ss-icon"><i class="fas fa-stopwatch"></i></div>
+                        <div class="ss-body">
+                            <div class="ss-label">Avg Response Time</div>
+                            <div class="ss-value">
+                                {% if stats.avg_response %}
+                                    {{ stats.avg_response }} min per dispatch
+                                {% else %}
+                                    No dispatch data today
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="ss-number" style="font-size:1.15rem;color:#c48830;">
+                            {% if stats.avg_response %}{{ stats.avg_response }}<span style="font-size:0.65rem;font-weight:600;"> m</span>{% else %}&mdash;{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="ss-row teal">
+                        <div class="ss-icon"><i class="fas fa-server"></i></div>
+                        <div class="ss-body">
+                            <div class="ss-label">System Status</div>
+                            <div class="ss-value">
+                                <span class="ss-pulse"></span>All systems operational
+                            </div>
+                        </div>
+                        <div class="ss-status-badge">ONLINE</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div><!-- /dashboard-body -->
+    </div><!-- /main-content -->
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        function showToast(msg, type) {
+            var c = document.getElementById('toastContainer');
+            var t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + msg;
+            c.appendChild(t);
+            setTimeout(function() { t.remove(); }, 3500);
+        }
+
+        // Live clock
+        function updateClock() {
+            var now = new Date();
+            var h = String(now.getHours()).padStart(2, '0');
+            var m = String(now.getMinutes()).padStart(2, '0');
+            var s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('liveClock').textContent = h + ':' + m + ':' + s;
+
+            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            document.getElementById('liveDate').textContent =
+                days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('avatarWrap');
+            if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+        });
+
+        // ===== All-Stats Live Sync (every 30s) =====
+        function syncAllStats() {
+            fetch('/admin-api/all-stats')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var h = document.getElementById('statTotalHospitals');
+                if (h && d.total_hospitals !== undefined) h.textContent = d.total_hospitals;
+                var dr = document.getElementById('statTotalDrivers');
+                if (dr && d.total_drivers !== undefined) dr.textContent = d.total_drivers;
+                var e = document.getElementById('statEmergenciesToday');
+                if (e && d.emergencies_today !== undefined) e.textContent = d.emergencies_today;
+                // System Summary live numbers
+                var ssh = document.getElementById('ssTotalHospitals');
+                if (ssh && d.total_hospitals !== undefined) ssh.textContent = d.total_hospitals;
+                var ssd = document.getElementById('ssTotalDrivers');
+                if (ssd && d.total_drivers !== undefined) ssd.textContent = d.total_drivers;
+                var sse = document.getElementById('ssEmergenciesToday');
+                if (sse && d.emergencies_today !== undefined) sse.textContent = d.emergencies_today;
+            })
+            .catch(function() {});
+        }
+        syncAllStats();
+        setInterval(syncAllStats, 30000);
+    </script>
+
+    <script>
+        (function() {
+            const hour = new Date().getHours();
+            let greeting, emoji;
+            if (hour >= 0 && hour < 5) {
+                greeting = "Good Night"; emoji = "🌙";
+            } else if (hour >= 5 && hour < 12) {
+                greeting = "Good Morning"; emoji = "☀️";
+            } else if (hour >= 12 && hour < 17) {
+                greeting = "Good Afternoon"; emoji = "🌤️";
+            } else {
+                greeting = "Good Evening"; emoji = "🌆";
+            }
+            document.getElementById('greeting').innerHTML =
+                greeting + ', <span style="color:#60a5fa">Admin</span> ' + emoji;
+        })();
+    </script>
+
+</body>
+</html>

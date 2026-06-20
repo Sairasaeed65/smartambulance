@@ -1,0 +1,1025 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Response - Smart Ambulance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%; height: 100vh;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: #f0f5ff;
+            color: #0c1a2e;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            height: 65px; flex-shrink: 0;
+            background: linear-gradient(90deg, #ffffff, #f8fbff);
+            border-bottom: 2px solid #dbeafe;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .pulse-dot {
+            width: 14px; height: 14px;
+            background: #dc2626; border-radius: 50%;
+            animation: pulse 1s ease-in-out infinite;
+            box-shadow: 0 0 12px #dc2626;
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50%      { transform: scale(1.4); opacity: 0.5; }
+        }
+        .header-title { font-family: 'Poppins',sans-serif; font-size: 1.1rem; font-weight: 800; color: #dc2626; letter-spacing: 0.5px; text-transform: uppercase; }
+        .header-clock { text-align: center; }
+        .clock-time { font-weight: 700; font-size: 1.1rem; color: #0c1a2e; }
+        .clock-date { font-size: 0.75rem; color: #5b7fa6; }
+        .btn-back {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 8px;
+            border: 1.5px solid #2563eb;
+            background: #eff6ff;
+            color: #0c1a2e; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-back:hover { background: #dbeafe; transform: translateY(-1px); }
+
+        /* BANNER */
+        .banner {
+            height: 44px; flex-shrink: 0;
+            background: linear-gradient(90deg, #dbeafe, #bfdbfe);
+            border-bottom: 1px solid #93c5fd;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 600; color: #1d4ed8;
+            transition: background 0.4s;
+        }
+
+        /* FEEDBACK MODAL */
+        .feedback-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(12, 26, 46, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .feedback-modal.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .feedback-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .feedback-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0c1a2e;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .feedback-subtitle {
+            font-size: 0.85rem;
+            color: #5b7fa6;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .feedback-group {
+            margin-bottom: 20px;
+        }
+        .feedback-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0c1a2e;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .radio-group {
+            display: flex;
+            gap: 12px;
+        }
+        .radio-option {
+            flex: 1;
+        }
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        .radio-option label {
+            display: block;
+            padding: 10px 14px;
+            border: 2px solid #c7d7f9;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: #f8fbff;
+        }
+        .radio-option input[type="radio"]:checked + label {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #2563eb;
+        }
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .star {
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.4;
+            filter: drop-shadow(0 0 0 #fbbf24);
+        }
+        .star:hover,
+        .star.active {
+            opacity: 1;
+            transform: scale(1.1);
+            filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.4));
+        }
+        .comment-box {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #c7d7f9;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+        .comment-box:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #f8fbff;
+        }
+        .feedback-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .btn-submit-feedback {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-submit-feedback:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+        .btn-submit-feedback:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-cancel-feedback {
+            flex: 1;
+            padding: 12px 20px;
+            background: #f0f5ff;
+            color: #2563eb;
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel-feedback:hover {
+            background: #eff6ff;
+        }
+        .feedback-confirmation {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .confirmation-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        .confirmation-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0c1a2e;
+            margin-bottom: 8px;
+        }
+        .confirmation-sub {
+            font-size: 0.85rem;
+            color: #5b7fa6;
+            margin-bottom: 24px;
+        }
+        .btn-done {
+            display: inline-block;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-done:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(22, 163, 74, 0.3);
+        }
+
+        /* MAIN LAYOUT */
+        .layout {
+            display: flex; flex: 1; min-height: 0;
+        }
+
+        /* MAP */
+        .map-wrap {
+            flex: 0 0 65%;
+            padding: 16px; border-right: 1px solid #dbeafe;
+            display: flex; flex-direction: column;
+        }
+        #map {
+            flex: 1; width: 100%;
+            border: 2px solid #93c5fd;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            flex: 0 0 35%; display: flex; flex-direction: column; overflow: hidden;
+            background: #ffffff;
+        }
+        .sidebar-header {
+            padding: 20px 24px; flex-shrink: 0;
+            border-bottom: 1px solid #dbeafe;
+            background: #f8fbff;
+        }
+        .sidebar-title { font-family: 'Poppins',sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 4px; color: #0c1a2e; }
+        .sidebar-sub { font-size: 0.78rem; color: #5b7fa6; }
+        .traffic-badge { color: #2563eb; font-size: 0.7rem; font-weight: 600; margin-top: 4px; }
+
+        .hospital-list {
+            flex: 1; overflow-y: auto; padding: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #93c5fd #f0f5ff;
+        }
+        .hospital-list::-webkit-scrollbar { width: 6px; }
+        .hospital-list::-webkit-scrollbar-track { background: #f0f5ff; border-radius: 10px; }
+        .hospital-list::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
+
+        /* CARDS */
+        .card {
+            background: #ffffff;
+            border: 1px solid #c7d7f9;
+            border-radius: 10px; padding: 14px;
+            margin-bottom: 12px; cursor: pointer;
+            transition: all 0.25s;
+            animation: fadeUp 0.4s ease-out both;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.05);
+        }
+        .card:nth-child(1) { animation-delay: 0.05s; }
+        .card:nth-child(2) { animation-delay: 0.10s; }
+        .card:nth-child(3) { animation-delay: 0.15s; }
+        .card:nth-child(4) { animation-delay: 0.20s; }
+        .card:nth-child(5) { animation-delay: 0.25s; }
+        .card:nth-child(6) { animation-delay: 0.30s; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .card:hover {
+            border-color: #93c5fd;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.15);
+            transform: translateY(-2px);
+        }
+        .card.selected {
+            border: 2px solid #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.15);
+        }
+        .card.ai-selected {
+            border: 2px solid #16a34a;
+            background: #f0fdf4;
+        }
+        .card-name { font-family: 'Poppins',sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 5px; color: #0c1a2e; }
+        .card-badge { color: #15803d; font-weight: 700; font-size: 0.75rem; margin-left: 8px; }
+        .card-addr { font-size: 0.78rem; color: #5b7fa6; margin-bottom: 10px; }
+        .card-stats {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; margin-bottom: 10px;
+            padding-bottom: 10px; border-bottom: 1px solid #dbeafe;
+        }
+        .stat-lbl { font-size: 0.62rem; color: #93aec8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-val { font-family: 'Poppins',sans-serif; font-weight: 700; font-size: 0.95rem; color: #2563eb; }
+        .btn-dir {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 8px;
+            background: transparent; border: 1.5px solid #2563eb;
+            color: #2563eb; border-radius: 7px;
+            font-weight: 700; font-size: 0.78rem;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-dir:hover { background: #2563eb; color: #ffffff; }
+
+        /* SPINNER */
+        .spinner-wrap {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 50px; gap: 16px; color: #5b7fa6; font-size: 0.9rem;
+        }
+        .spinner {
+            width: 38px; height: 38px;
+            border: 3px solid #dbeafe;
+            border-top-color: #2563eb; border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            .map-wrap { flex: 0 0 50%; border-right: none; border-bottom: 1px solid #dbeafe; }
+            .sidebar { flex: 0 0 50%; }
+        }
+        @media (max-width: 600px) {
+            .header { padding: 0 15px; }
+            .header-clock { display: none; }
+            .map-wrap { padding: 10px; }
+            .sidebar-header { padding: 14px 16px; }
+            .hospital-list { padding: 10px; }
+        }
+    </style>
+    <script src="/location-utils.js"></script>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="pulse-dot"></div>
+            <div class="header-title">🚨 Emergency Active</div>
+        </div>
+        <div class="header-clock">
+            <div class="clock-time" id="clock">00:00:00</div>
+            <div class="clock-date" id="clockDate">Loading...</div>
+        </div>
+        <button class="btn-back" onclick="window.location.href='/';">← Back to Home</button>
+    </div>
+
+    <!-- STATUS BANNER -->
+    <div class="banner" id="banner">🤖 AI is selecting the nearest hospital... sending request in 3</div>
+
+    <!-- MAIN -->
+    <div class="layout">
+        <div class="map-wrap">
+            <div id="map"></div>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">🏥 Nearest Hospitals</div>
+                <div class="sidebar-sub" id="sidebarSub">Detecting your location...</div>
+            </div>
+            <div class="hospital-list" id="hospitalList">
+                <div class="spinner-wrap">
+                    <div class="spinner"></div>
+                    <span>Finding hospitals near you...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEEDBACK MODAL -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="feedback-card">
+            <!-- FEEDBACK FORM -->
+            <div id="feedbackForm" style="display: block;">
+                <div class="feedback-title">Thanks for using Smart Ambulance! 🙏</div>
+                <div class="feedback-subtitle">Please share your feedback about this service</div>
+
+                <!-- On-time arrival -->
+                <div class="feedback-group">
+                    <label class="feedback-label">Did the ambulance arrive on time?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="onTime_yes" name="on_time" value="yes">
+                            <label for="onTime_yes">✅ Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="onTime_no" name="on_time" value="no">
+                            <label for="onTime_no">⏱️ Late</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overall Rating -->
+                <div class="feedback-group">
+                    <label class="feedback-label">Service Rating (1-5 stars)</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">⭐</span>
+                        <span class="star" data-rating="2">⭐</span>
+                        <span class="star" data-rating="3">⭐</span>
+                        <span class="star" data-rating="4">⭐</span>
+                        <span class="star" data-rating="5">⭐</span>
+                    </div>
+                </div>
+
+                <!-- Driver Rating -->
+                <div class="feedback-group">
+                    <label class="feedback-label">Driver Professionalism (1-5)</label>
+                    <div class="star-rating" id="driverRating">
+                        <span class="star" data-rating="1">👤</span>
+                        <span class="star" data-rating="2">👤</span>
+                        <span class="star" data-rating="3">👤</span>
+                        <span class="star" data-rating="4">👤</span>
+                        <span class="star" data-rating="5">👤</span>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="feedback-group">
+                    <label class="feedback-label">Additional Comments (optional)</label>
+                    <textarea class="comment-box" id="feedbackComment" placeholder="Share any additional feedback, suggestions, or concerns..."></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="feedback-buttons">
+                    <button class="btn-cancel-feedback" onclick="skipFeedback()">Skip</button>
+                    <button class="btn-submit-feedback" onclick="submitFeedback()">Submit Feedback</button>
+                </div>
+            </div>
+
+            <!-- CONFIRMATION MESSAGE -->
+            <div id="feedbackConfirmation" style="display: none;">
+                <div class="feedback-confirmation">
+                    <div class="confirmation-icon">✨</div>
+                    <div class="confirmation-text">Thank You!</div>
+                    <div class="confirmation-sub">Your feedback helps us improve our service</div>
+                    <button class="btn-done" onclick="closeFeedback()">Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── patient info: Flask session (primary) + sessionStorage (fallback) ─
+        var _sessionPatientName  = "{{ patient_name|e }}" || sessionStorage.getItem('full_name') || '';
+        var _sessionPatientPhone = "{{ patient_phone|e }}" || sessionStorage.getItem('phone') || '';
+
+        // ── state ──────────────────────────────────────────────
+        var map, userMarker, directionsRenderer, directionsService;
+        var userLat = 32.5748, userLng = 74.0789;   // default Gujrat, PK
+        var hospitals = [];
+        var selectedIndex = 0;
+        var dispatched = false;
+        var currentRequestId = null;
+        var feedbackData = {
+            on_time: null,
+            rating: null,
+            driver_rating: null,
+            comment: ''
+        };
+
+        // ── init feedback form ─────────────────────────────────
+        function initFeedbackForm() {
+            // Star rating handlers (service)
+            document.querySelectorAll('#starRating .star').forEach(function(star) {
+                star.addEventListener('click', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    feedbackData.rating = rating;
+                    document.querySelectorAll('#starRating .star').forEach(function(s, i) {
+                        s.classList.toggle('active', i < rating);
+                    });
+                });
+                star.addEventListener('mouseover', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    document.querySelectorAll('#starRating .star').forEach(function(s, i) {
+                        s.style.opacity = (i < rating) ? '1' : '0.4';
+                    });
+                });
+            });
+            document.getElementById('starRating').addEventListener('mouseout', function() {
+                document.querySelectorAll('#starRating .star').forEach(function(s) {
+                    s.style.opacity = s.classList.contains('active') ? '1' : '0.4';
+                });
+            });
+
+            // Star rating handlers (driver)
+            document.querySelectorAll('#driverRating .star').forEach(function(star) {
+                star.addEventListener('click', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    feedbackData.driver_rating = rating;
+                    document.querySelectorAll('#driverRating .star').forEach(function(s, i) {
+                        s.classList.toggle('active', i < rating);
+                    });
+                });
+                star.addEventListener('mouseover', function() {
+                    var rating = parseInt(this.getAttribute('data-rating'));
+                    document.querySelectorAll('#driverRating .star').forEach(function(s, i) {
+                        s.style.opacity = (i < rating) ? '1' : '0.4';
+                    });
+                });
+            });
+            document.getElementById('driverRating').addEventListener('mouseout', function() {
+                document.querySelectorAll('#driverRating .star').forEach(function(s) {
+                    s.style.opacity = s.classList.contains('active') ? '1' : '0.4';
+                });
+            });
+
+            // On-time radio buttons
+            document.querySelectorAll('input[name="on_time"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    feedbackData.on_time = this.value;
+                });
+            });
+
+            // Comment textarea
+            document.getElementById('feedbackComment').addEventListener('input', function() {
+                feedbackData.comment = this.value;
+            });
+        }
+
+        function showFeedback(requestId) {
+            currentRequestId = requestId;
+            feedbackData = { on_time: null, rating: null, driver_rating: null, comment: '' };
+            document.getElementById('feedbackForm').style.display = 'block';
+            document.getElementById('feedbackConfirmation').style.display = 'none';
+            document.getElementById('feedbackModal').classList.add('active');
+            // Reset form
+            document.querySelectorAll('input[name="on_time"]').forEach(function(r) { r.checked = false; });
+            document.querySelectorAll('.star').forEach(function(s) { s.classList.remove('active'); });
+            document.getElementById('feedbackComment').value = '';
+        }
+
+        function skipFeedback() {
+            closeFeedback();
+        }
+
+        function submitFeedback() {
+            var submitBtn = document.querySelector('.btn-submit-feedback');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            var payload = {
+                request_id: currentRequestId,
+                on_time: feedbackData.on_time,
+                rating: feedbackData.rating,
+                driver_rating: feedbackData.driver_rating,
+                comment: feedbackData.comment
+            };
+
+            fetch('/submit-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    document.getElementById('feedbackForm').style.display = 'none';
+                    document.getElementById('feedbackConfirmation').style.display = 'block';
+                } else {
+                    alert('Error submitting feedback: ' + (data.message || 'Unknown error'));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Feedback';
+                }
+            })
+            .catch(function(e) {
+                alert('Error submitting feedback');
+                console.error(e);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Feedback';
+            });
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedbackModal').classList.remove('active');
+            currentRequestId = null;
+        }
+
+        // ── clock ──────────────────────────────────────────────
+        function tick() {
+            var now = new Date();
+            document.getElementById('clock').textContent =
+                now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clockDate').textContent =
+                now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+        }
+        tick();
+        setInterval(tick, 1000);
+
+        // ── init feedback form ──────────────────────────────────
+        initFeedbackForm();
+
+        // ── init map ───────────────────────────────────────────
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: userLat, lng: userLng },
+                zoom: 14,
+                mapTypeId: 'roadmap',
+                fullscreenControl: true,
+                zoomControl: true,
+                streetViewControl: false,
+                mapTypeControl: false,
+                gestureHandling: 'greedy'
+            });
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true,
+                polylineOptions: { strokeColor: '#1a73e8', strokeOpacity: 0.85, strokeWeight: 5 }
+            });
+            directionsRenderer.setMap(map);
+            getLocation();
+        }
+
+        // ── geolocation ────────────────────────────────────────
+        function getLocation() {
+            if (!navigator.geolocation) { loadHospitals(); return; }
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    placeUserMarker();
+                    map.setCenter({ lat: userLat, lng: userLng });
+                    loadHospitals();
+                    watchLocation();
+                },
+                function() { placeUserMarker(); loadHospitals(); }
+            );
+        }
+
+        function watchLocation() {
+            navigator.geolocation.watchPosition(function(pos) {
+                var newLat = pos.coords.latitude, newLng = pos.coords.longitude;
+                if (Math.abs(newLat - userLat) > 0.0001 || Math.abs(newLng - userLng) > 0.0001) {
+                    userLat = newLat; userLng = newLng;
+                    if (userMarker) userMarker.setPosition({ lat: userLat, lng: userLng });
+                }
+            }, null, { enableHighAccuracy: true, maximumAge: 0 });
+        }
+
+        function placeUserMarker() {
+            if (userMarker) userMarker.setMap(null);
+            userMarker = new google.maps.Marker({
+                position: { lat: userLat, lng: userLng },
+                map: map,
+                title: 'Your Location',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 13,
+                    fillColor: '#00ff88', fillOpacity: 1,
+                    strokeColor: 'rgba(0,255,136,0.4)', strokeWeight: 7
+                },
+                zIndex: 300
+            });
+            var iw = new google.maps.InfoWindow({ content: '<b style="color:#0d1117">🚑 Your Location</b>' });
+            userMarker.addListener('click', function() { iw.open(map, userMarker); });
+        }
+
+        // ── load hospitals ─────────────────────────────────────
+        function loadHospitals() {
+            document.getElementById('hospitalList').innerHTML =
+                '<div class="spinner-wrap"><div class="spinner"></div><span>Finding hospitals near you...</span></div>';
+
+            fetch('/nearest-hospitals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ latitude: userLat, longitude: userLng })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'success' && data.hospitals && data.hospitals.length > 0) {
+                    hospitals = data.hospitals.slice(0, 6);
+                    renderHospitals();
+                    startCountdown();
+                } else {
+                    document.getElementById('hospitalList').innerHTML =
+                        '<div class="spinner-wrap"><span>🏥 No hospitals found nearby</span></div>';
+                }
+            })
+            .catch(function(e) {
+                document.getElementById('hospitalList').innerHTML =
+                    '<div class="spinner-wrap"><span>⚠️ Error loading hospitals</span></div>';
+                console.error(e);
+            });
+        }
+
+        // ── render hospital cards ──────────────────────────────
+        function renderHospitals() {
+            var list = document.getElementById('hospitalList');
+            list.innerHTML = '';
+
+            selectedIndex = 0;
+            document.getElementById('sidebarSub').textContent =
+                '⏳ AI is analyzing traffic & beds... • tap any card to preview route only';
+
+            // clear old markers
+            if (window._hMarkers) window._hMarkers.forEach(function(m) { m.setMap(null); });
+            window._hMarkers = [];
+
+            hospitals.forEach(function(h, i) {
+                var tLabel = h.traffic === 'heavy' ? '🔴 Heavy' :
+                             h.traffic === 'moderate' ? '🟡 Moderate' : '🟢 Light';
+
+                // map marker — no special color yet, AI hasn't decided
+                var marker = new google.maps.Marker({
+                    position: { lat: h.latitude, lng: h.longitude },
+                    map: map, title: h.name,
+                    icon: {
+                        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                        scale: 8,
+                        fillColor: i === 0 ? '#00d4ff' : '#ef4444',
+                        fillOpacity: 0.95,
+                        strokeColor: '#fff', strokeWeight: 2
+                    },
+                    zIndex: i === 0 ? 200 : 100
+                });
+                var iw = new google.maps.InfoWindow({
+                    content: '<div style="color:#0d1117;padding:8px;font-weight:600;min-width:200px;">'
+                        + '<b>🏥 ' + h.name + '</b><br>'
+                        + '📏 ' + h.distance_km.toFixed(1) + ' km &nbsp; ⏱️ ' + h.eta_minutes + ' min<br>'
+                        + '🚦 Traffic: ' + tLabel + '<br>'
+                        + '🛏️ ' + h.available_beds + ' beds available</div>'
+                });
+                marker.addListener('click', function() {
+                    iw.open(map, marker);
+                    previewHospital(i);
+                });
+                window._hMarkers.push(marker);
+
+                // card — no badge yet, will be set after dispatch result
+                var card = document.createElement('div');
+                card.className = 'card' + (i === selectedIndex ? ' selected' : '');
+                card.dataset.hospitalId = h.hospital_id;
+                card.innerHTML =
+                    '<div class="card-name">' + h.name + '</div>'
+                    + '<div class="card-addr">📍 ' + h.address + '</div>'
+                    + '<div class="card-stats">'
+                    +   '<div><div class="stat-lbl">Distance</div><div class="stat-val">' + h.distance_km.toFixed(1) + ' km</div></div>'
+                    +   '<div><div class="stat-lbl">ETA</div><div class="stat-val">' + h.eta_minutes + ' min</div></div>'
+                    +   '<div><div class="stat-lbl">Traffic</div><div class="stat-val">' + tLabel + '</div></div>'
+                    +   '<div><div class="stat-lbl">Beds</div><div class="stat-val">' + h.available_beds + '</div></div>'
+                    + '</div>'
+                    + '<a class="btn-dir" href="https://www.google.com/maps/dir/?api=1&destination='
+                    + h.latitude + ',' + h.longitude + '" target="_blank">📍 Get Directions</a>';
+                card.addEventListener('click', function() { previewHospital(i); });
+                list.appendChild(card);
+            });
+
+            // Default preview is nearest hospital (index 0)
+            showRoute(hospitals[0]);
+        }
+
+        function previewHospital(index) {
+            selectedIndex = index;
+            document.querySelectorAll('.card').forEach(function(c, i) {
+                c.classList.toggle('selected', i === selectedIndex);
+            });
+            map.setCenter({ lat: hospitals[index].latitude, lng: hospitals[index].longitude });
+            map.setZoom(15);
+            showRoute(hospitals[index]);
+        }
+
+        // ── show driving route ─────────────────────────────────
+        function showRoute(hospital) {
+            if (!directionsService) return;
+            var routeColor = getRouteColor(hospital.traffic);
+            directionsRenderer.setOptions({
+                polylineOptions: {
+                    strokeColor: routeColor,
+                    strokeOpacity: 0.9,
+                    strokeWeight: 6
+                }
+            });
+            directionsService.route({
+                origin: { lat: userLat, lng: userLng },
+                destination: { lat: hospital.latitude, lng: hospital.longitude },
+                travelMode: google.maps.TravelMode.DRIVING,
+                drivingOptions: {
+                    departureTime: new Date(),
+                    trafficModel: google.maps.TrafficModel.BEST_GUESS
+                }
+            }, function(result, status) {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    var leg = result.routes[0].legs[0];
+                    // use traffic-aware ETA if available, otherwise regular duration
+                    var eta = leg.duration_in_traffic ? leg.duration_in_traffic.text : leg.duration.text;
+                    // update card stats with real route data
+                    var cards = document.querySelectorAll('.card');
+                    if (cards[selectedIndex]) {
+                        var vals = cards[selectedIndex].querySelectorAll('.stat-val');
+                        if (vals[0]) vals[0].textContent = leg.distance.text;
+                        if (vals[1]) vals[1].textContent = eta;
+                    }
+                }
+            });
+        }
+
+        function getRouteColor(traffic) {
+            if (traffic === 'heavy') return '#dc2626';
+            if (traffic === 'moderate') return '#ea580c';
+            return '#16a34a';
+        }
+
+        // ── update AI Selected badge to match actual dispatched hospital ──
+        function updateAISelectedBadge(dispatchedName, dispatchedId) {
+            var cards = document.querySelectorAll('#hospitalList .card');
+            cards.forEach(function(card, i) {
+                var nameEl = card.querySelector('.card-name');
+                if (!nameEl) return;
+
+                // Remove any existing badge from this card
+                var existingBadge = nameEl.querySelector('.card-badge');
+                if (existingBadge) existingBadge.remove();
+                card.classList.remove('ai-selected');
+
+                // Match by card's own data-hospital-id attribute (set at render time)
+                // This is reliable regardless of how the hospitals array was re-sorted later
+                var cardHospitalId = card.dataset.hospitalId;
+                var isMatch = false;
+                if (dispatchedId && cardHospitalId) {
+                    isMatch = (String(cardHospitalId) === String(dispatchedId));
+                }
+                // Name fallback: look up this card's hospital in the hospitals array by ID
+                if (!isMatch && dispatchedName && cardHospitalId) {
+                    var h = hospitals.find(function(x) { return String(x.hospital_id) === String(cardHospitalId); });
+                    if (h) isMatch = (h.name.trim().toLowerCase() === dispatchedName.trim().toLowerCase());
+                }
+
+                if (isMatch) {
+                    var badge = document.createElement('span');
+                    badge.className = 'card-badge';
+                    badge.textContent = '✓ AI Selected (Dispatch)';
+                    nameEl.appendChild(badge);
+                    card.classList.add('ai-selected');
+                    // Scroll card into view
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    // Update map marker color to green for dispatched hospital
+                    if (window._hMarkers && window._hMarkers[i]) {
+                        window._hMarkers[i].setIcon({
+                            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                            scale: 8,
+                            fillColor: '#00ff88',
+                            fillOpacity: 0.95,
+                            strokeColor: '#fff', strokeWeight: 2
+                        });
+                        window._hMarkers[i].setZIndex(300);
+                    }
+                }
+            });
+
+            // Update sidebar subtitle
+            var sub = document.getElementById('sidebarSub');
+            if (sub) sub.textContent = '🤖 AI dispatched to ' + dispatchedName + ' • tap any card to preview route only';
+        }
+
+        // ── countdown & dispatch ───────────────────────────────
+        function startCountdown() {
+            if (dispatched) return;
+            var count = 3;
+            var banner = document.getElementById('banner');
+            var timer = setInterval(function() {
+                if (count > 0) {
+                    banner.textContent = '🤖 AI is selecting the nearest hospital... sending request in ' + count;
+                    count--;
+                } else {
+                    clearInterval(timer);
+                    dispatch();
+                }
+            }, 1000);
+        }
+
+        function dispatch() {
+            if (dispatched) return;
+            dispatched = true;
+            var banner = document.getElementById('banner');
+            banner.textContent = '🔄 Connecting to hospital...';
+
+            // Use already-obtained coordinates directly — no need for a second GPS request
+            sendDispatch(userLat, userLng);
+        }
+
+        var statusPollInterval = null;
+
+        function sendDispatch(lat, lng) {
+            fetch('/dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lat: lat,
+                    lng: lng,
+                    name: _sessionPatientName || null,
+                    phone: _sessionPatientPhone || null
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var banner = document.getElementById('banner');
+                if (data.status === 'success') {
+                    var hospitalName = data.hospital_name
+                        || (data.ambulance && data.ambulance.hospital_name)
+                        || 'Hospital';
+                    var dispatchedHospitalId = data.hospital_id
+                        || (data.ambulance && data.ambulance.hospital_id)
+                        || null;
+
+                    // Update the "AI Selected" badge to match the ACTUAL dispatched hospital
+                    updateAISelectedBadge(hospitalName, dispatchedHospitalId);
+
+                    banner.innerHTML = '⏳ Request sent to <strong>' + hospitalName
+                        + '</strong> — waiting for hospital confirmation...';
+                    banner.style.background = 'linear-gradient(90deg,rgba(0,255,136,0.25),rgba(0,204,102,0.18))';
+                    if (data.request_id) {
+                        startStatusPolling(data.request_id);
+                    }
+                } else {
+                    banner.textContent = '❌ Dispatch failed: ' + (data.message || 'Unknown error');
+                    banner.style.background = 'linear-gradient(90deg,rgba(255,51,51,0.2),rgba(255,51,51,0.12))';
+                }
+            })
+            .catch(function(e) {
+                document.getElementById('banner').textContent = '❌ Error sending dispatch request';
+                console.error(e);
+            });
+        }
+
+        function startStatusPolling(requestId) {
+            if (statusPollInterval) clearInterval(statusPollInterval);
+            statusPollInterval = setInterval(function() {
+                fetch('/get-request-status?request_id=' + encodeURIComponent(requestId))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.status !== 'success') return;
+                    var banner = document.getElementById('banner');
+                    var s = data.current_status;
+                    var hospitalName = (data.hospital && data.hospital.name) || 'Hospital';
+                    var driverName = (data.assigned_driver && data.assigned_driver.name) || null;
+                    var driverPhone = (data.assigned_driver && data.assigned_driver.phone) || null;
+                    if (s === 'pending') {
+                        banner.innerHTML = '<span>⏳ Waiting for <strong>' + hospitalName + '</strong> to assign a driver...</span>';
+                    } else if (s === 'accepted' || s === 'assigned') {
+                        banner.innerHTML = '✅ Accepted by <strong>' + hospitalName + '</strong>'
+                            + (driverName ? ' — Driver: <strong>' + driverName + '</strong>' : '')
+                            + (driverPhone ? ' (' + driverPhone + ')' : '');
+                        banner.style.background = 'linear-gradient(90deg,rgba(0,255,136,0.25),rgba(0,204,102,0.18))';
+                    } else if (s === 'en_route') {
+                        banner.innerHTML = '🚑 <strong>' + (driverName || 'Driver') + '</strong> is on the way to your location!';
+                        banner.style.background = 'linear-gradient(90deg,rgba(0,255,136,0.30),rgba(0,204,102,0.22))';
+                    } else if (s === 'completed') {
+                        banner.innerHTML = '✅ Ambulance has arrived. Stay safe!';
+                        clearInterval(statusPollInterval);
+                        if (requestId) {
+                            setTimeout(function() { showFeedback(requestId); }, 500);
+                        }
+                    } else if (s === 'rejected') {
+                        banner.innerHTML = '❌ Request rejected by hospital. Please select another hospital.';
+                        banner.style.background = 'linear-gradient(90deg,rgba(255,51,51,0.2),rgba(255,51,51,0.12))';
+                        clearInterval(statusPollInterval);
+                        dispatched = false;
+                    }
+                })
+                .catch(function(e) { console.error('[STATUS POLL]', e); });
+            }, 3000);
+        }
+
+        // ── bootstrap ──────────────────────────────────────────
+        window.addEventListener('load', function() {
+            var script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_KEY }}&callback=initMap';
+            script.async = true;
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

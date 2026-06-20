@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for Responsiveness and Character Encoding -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Driven Emergency Ambulance Routing System - Fast, Intelligent, Life-Saving Response">
+    <meta name="theme-color" content="#0f1419">
+    <title>SmartAmbulance - Emergency Routing System</title>
+    
+    <!-- Bootstrap 5 CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 Icon Library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts: Poppins (Headings), Inter (Body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet -->
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    
+    <!-- Loading Spinner Styles -->
+    <style>
+        /* Location Spinner Modal */
+        .location-spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .location-spinner-container {
+            text-align: center;
+            padding: 40px 20px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Spinner SVG */
+        .location-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            height: 100px;
+            width: 100px;
+        }
+
+        .spinner-svg {
+            width: 100px;
+            height: 100px;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+        }
+
+        /* Pulsing rings animation */
+        .pulse-ring-1 {
+            animation: pulseOut 2s ease-out infinite;
+        }
+
+        .pulse-ring-2 {
+            animation: pulseOut 2s ease-out infinite;
+            animation-delay: 0.4s;
+        }
+
+        .pulse-ring-3 {
+            animation: pulseOut 2s ease-out infinite;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes pulseOut {
+            0% {
+                r: 8px;
+                opacity: 1;
+            }
+            100% {
+                r: 18px;
+                opacity: 0;
+            }
+        }
+
+        /* Text Styles */
+        .spinner-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e8eef7;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .spinner-description {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #a0a8b8;
+            margin-bottom: 25px;
+        }
+
+        /* Progress Bar */
+        .spinner-progress {
+            width: 100%;
+            max-width: 200px;
+            height: 3px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 3px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .progress-bar-animated {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent,
+                #00d4ff,
+                transparent
+            );
+            background-size: 200% 100%;
+            animation: slideProgress 1.5s infinite;
+        }
+
+        @keyframes slideProgress {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Home Map Container */
+        .home-map-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            z-index: 9000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #homeMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 9001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .map-control-btn {
+            padding: 10px 16px;
+            background: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .map-control-btn.confirm {
+            background: linear-gradient(135deg, #00d4ff, #0066cc);
+            color: #fff;
+        }
+
+        .map-control-btn.cancel {
+            background: #e8eef7;
+            color: #1a2332;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            z-index: 9001;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.user {
+            background: #4285f4;
+        }
+
+        .legend-dot.hospital {
+            background: #d4143c;
+        }
+
+        @media (max-width: 768px) {
+            .map-controls {
+                bottom: 20px;
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                top: auto;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .map-control-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .map-legend {
+                bottom: calc(80px + 20px);
+                font-size: 0.8rem;
+                padding: 12px;
+            }
+        }
+
+        /* ==================== PROFILE DROPDOWN STYLES ==================== */
+        .profile-btn {
+            color: #e6edf3 !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            color: #00ff88 !important;
+        }
+
+        .profile-dropdown {
+            background: rgba(22, 27, 34, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(48, 54, 61, 0.5) !important;
+            border-radius: 12px;
+            min-width: 320px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: dropdownSlideDown 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes dropdownSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Avatar Section */
+        .profile-avatar-section {
+            padding: 20px 16px 16px;
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border-bottom: 1px solid #30363d;
+        }
+
+        .profile-avatar-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #0d1117;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+            letter-spacing: -1px;
+        }
+
+        /* Name Section */
+        .profile-name-section {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .profile-full-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e6edf3;
+            letter-spacing: -0.5px;
+        }
+
+        /* Info Items */
+        .profile-info-item {
+            padding: 0;
+            list-style: none;
+        }
+
+        .profile-info-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            gap: 12px;
+            color: #8b949e;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .profile-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .profile-info-icon {
+            color: #00ff88;
+            font-size: 14px;
+            margin-top: 2px;
+            min-width: 14px;
+        }
+
+        .profile-info-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-info-label {
+            display: block;
+            color: #6e7681;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .profile-info-value {
+            font-size: 0.9rem;
+            color: #e6edf3;
+            word-break: break-all;
+        }
+
+        /* Dividers */
+        .profile-divider {
+            border: none;
+            border-top: 1px solid #30363d;
+            margin: 0;
+        }
+
+        /* Action Buttons */
+        .profile-actions {
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .profile-btn-edit,
+        .profile-btn-logout {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-btn-edit {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #0d1117;
+            border: 1px solid transparent;
+        }
+
+        .profile-btn-edit:hover {
+            background: linear-gradient(135deg, #00ff88, #00aa44);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .profile-btn-logout {
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border: 1px solid rgba(255, 51, 51, 0.2);
+        }
+
+        .profile-btn-logout:hover {
+            background: rgba(255, 51, 51, 0.2);
+            border-color: rgba(255, 51, 51, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Profile Input Styling */
+        .form-control {
+            background: #0d1117 !important;
+            border-color: #30363d !important;
+            color: #e6edf3 !important;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            background: #161b22 !important;
+            border-color: #00ff88 !important;
+            color: #e6edf3 !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.15);
+        }
+
+        .form-label {
+            color: #e6edf3 !important;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .modal-content {
+            background: #161b22 !important;
+            border: 1px solid #30363d !important;
+        }
+
+        .modal-header {
+            background: rgba(0, 255, 136, 0.05);
+            border-bottom-color: #30363d !important;
+        }
+
+        .modal-title {
+            color: #e6edf3;
+            font-weight: 600;
+        }
+
+        .btn-secondary {
+            background: #30363d !important;
+            border-color: #30363d !important;
+            color: #e6edf3;
+        }
+
+        .btn-secondary:hover {
+            background: #3d444d !important;
+            border-color: #3d444d !important;
+        }
+
+        .alert-info {
+            background: rgba(0, 212, 255, 0.05) !important;
+            border-color: #1f6feb !important;
+        }
+
+        /* ==================== PROFILE PHOTO UPLOAD STYLES ==================== */
+        .profile-photo-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .profile-photo-upload-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+
+        .profile-photo-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+            position: relative;
+        }
+
+        .profile-photo-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-photo-avatar span {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0d1117;
+            z-index: 1;
+        }
+
+        .profile-photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-photo-upload-wrapper:hover .profile-photo-overlay {
+            opacity: 1;
+        }
+
+        .profile-photo-overlay i {
+            color: #fff;
+            font-size: 28px;
+        }
+
+        #profilePhotoInput {
+            display: none;
+        }
+
+        .profile-photo-label {
+            display: block;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== NAVIGATION BAR ==================== -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-lg navbar-container">
+            <!-- Brand Logo with ECG Heartbeat -->
+            <a class="navbar-brand fw-bold navbar-brand-spaced" href="/" style="display: flex; align-items: center;">
+                <!-- Animated ECG Heartbeat SVG -->
+                <svg class="navbar-ecg-icon" width="52" height="24" viewBox="0 0 54 24" fill="none" style="overflow: visible; flex-shrink: 0;">
+                    <polyline class="ecg-line" points="1,12 10,12 14,3 18,21 22,7 26,12 34,12 38,3 42,21 46,7 50,12 54,12" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle class="pulse-dot" cx="54" cy="12" r="3" fill="#ef4444"/>
+                </svg>
+                
+                <!-- Brand Name and Tagline Container -->
+                <div class="navbar-brand-group">
+                    <!-- Brand Name: Smart (white) + Ambulance (red italic) - Single Line -->
+                    <span style="white-space: nowrap; font-size: 24px; font-family: Georgia, serif;">
+                        <span style="color: white; font-weight: bold;">Smart</span><span style="color: #ef4444; font-style: italic; font-weight: 300;">Ambulance</span>
+                    </span>
+                    
+                    <!-- Tagline - Directly Below Brand Name -->
+                    <div class="navbar-tagline">AI-DRIVEN ROUTING SYSTEM</div>
+                </div>
+            </a>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-links-serif" href="/">Home</a>
+                    </li>
+                    <!-- Login Button (shown when not logged in) -->
+                    <li class="nav-item" id="navLoginItem">
+                        <button class="nav-login-button btn btn-link" data-bs-toggle="modal" data-bs-target="#loginModal" style="border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                            <svg class="navbar-user-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px; flex-shrink: 0;">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Login / Sign Up</span>
+                        </button>
+                    </li>
+                    <!-- Profile Dropdown (shown when logged in) -->
+                    <li class="nav-item dropdown" id="navProfileItem" style="display: none;">
+                        <button class="nav-link dropdown-toggle profile-btn" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: none;">
+                            <i class="fas fa-user-circle me-2"></i><span id="userNameDisplay"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown" aria-labelledby="profileDropdown">
+                            <!-- Avatar Section -->
+                            <li class="profile-avatar-section">
+                                <div class="profile-avatar-circle" id="profileAvatarCircle">
+                                    <span id="profileInitials"></span>
+                                </div>
+                            </li>
+                            
+                            <!-- User Name -->
+                            <li class="profile-name-section">
+                                <div id="profileFullNameLarge" class="profile-full-name"></div>
+                            </li>
+                            
+                            <!-- Divider -->
+                            <li><hr class="profile-divider"></li>
+                            
+                            <!-- Phone Number -->
+                            <li class="profile-info-item">
+                                <div class="profile-info-row">
+                                    <i class="fas fa-phone profile-info-icon"></i>
+                                    <div class="profile-info-content">
+                                        <small class="profile-info-label">Phone</small>
+                                        <div class="profile-info-value" id="profilePhoneLarge"></div>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <!-- CNIC -->
+                            <li class="profile-info-item">
+                                <div class="profile-info-row">
+                                    <i class="fas fa-id-card profile-info-icon"></i>
+                                    <div class="profile-info-content">
+                                        <small class="profile-info-label">CNIC</small>
+                                        <div class="profile-info-value text-truncate" id="profileCNICLarge"></div>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <!-- Divider -->
+                            <li><hr class="profile-divider"></li>
+                            
+                            <!-- Action Buttons -->
+                            <li class="profile-actions">
+                                <button class="profile-btn-edit" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                    <i class="fas fa-edit me-2"></i>Edit Profile
+                                </button>
+                                <button class="profile-btn-logout" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- ==================== EDIT PROFILE MODAL ==================== -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #161b22; border: 1px solid #30363d; border-radius: 12px;">
+                <div class="modal-header border-bottom" style="border-bottom-color: #30363d !important;">
+                    <h5 class="modal-title" id="editProfileLabel">
+                        <i class="fas fa-user-edit me-2" style="color: #00ff88;"></i>Edit Profile
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        <!-- Profile Photo Upload -->
+                        <div class="profile-photo-section">
+                            <div class="profile-photo-upload-wrapper" id="profilePhotoWrapper">
+                                <div class="profile-photo-avatar" id="editProfileAvatarPreview">
+                                    <span id="editProfileInitials"></span>
+                                </div>
+                                <div class="profile-photo-overlay">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <input type="file" id="profilePhotoInput" accept="image/*">
+                            <label class="profile-photo-label">Click avatar to upload photo</label>
+                        </div>
+                        
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label class="form-label" style="color: #e6edf3;">Full Name</label>
+                            <input type="text" class="form-control" id="editFullName" placeholder="Enter your full name" style="background: #0d1117; border-color: #30363d; color: #e6edf3;">
+                        </div>
+                        
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label class="form-label" style="color: #e6edf3;">Phone Number</label>
+                            <input type="text" class="form-control" id="editPhone" placeholder="03XXXXXXXXX" style="background: #0d1117; border-color: #30363d; color: #e6edf3;">
+                        </div>
+                        
+                        <!-- Note about CNIC -->
+                        <div class="alert alert-info" style="background: rgba(0, 212, 255, 0.1); border-color: rgba(0, 212, 255, 0.3); color: #a0a8b8;">
+                            <small><i class="fas fa-info-circle me-2"></i>CNIC cannot be changed</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top" style="border-top-color: #30363d !important;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" id="saveProfileBtn" style="background: linear-gradient(135deg, #00ff88, #00cc66); color: #0d1117; font-weight: 600; border: none;">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section id="home" class="hero-section">
+        <div class="container-lg">
+            <div class="hero-content text-center">
+                <!-- Main Heading with Accent Colors -->
+                <h1 class="hero-title mb-4">
+                    <span class="text-accent">AI-Driven</span> Emergency Ambulance <span class="text-accent">Routing</span> <span class="text-red">System</span>
+                </h1>
+                
+                <!-- Subheading -->
+                <p class="hero-subtitle mb-5">
+                    Fast. Intelligent. Life-Saving Response.
+                </p>
+                
+                <!-- Emergency Call-to-Action Button -->
+                <button class="btn-emergency" onclick="triggerEmergency()" aria-label="Emergency Help Button">
+                    EMERGENCY HELP
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FEATURES SECTION ==================== -->
+    <section id="features" class="features-section">
+        <div class="container-lg">
+            <!-- Section Header -->
+            <div class="section-header text-center">
+                <h2 class="section-title">Core Features</h2>
+                <p class="section-subtitle">Comprehensive solutions for emergency response</p>
+            </div>
+            
+            <!-- Feature Cards Grid -->
+            <div class="row g-4 mt-5">
+                <!-- Feature Card 1: Route Optimization -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <h5 class="feature-title">Route Optimization</h5>
+                        <p class="feature-description">Find optimal routes based on traffic and distance</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 2: Live Tracking -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-location-dot"></i>
+                        </div>
+                        <h5 class="feature-title">Live Tracking</h5>
+                        <p class="feature-description">Real-time GPS tracking of ambulances</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 3: Hospital Data -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-hospital"></i>
+                        </div>
+                        <h5 class="feature-title">Hospital Data</h5>
+                        <p class="feature-description">Integrate hospital bed and department info</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 4: Analytics -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="feature-title">Analytics</h5>
+                        <p class="feature-description">View performance metrics and response time data</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 5: Dispatcher Control -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h5 class="feature-title">Dispatcher Control</h5>
+                        <p class="feature-description">Centralized dashboard for dispatch management</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 6: Security -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-box">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield"></i>
+                        </div>
+                        <h5 class="feature-title">Security</h5>
+                        <p class="feature-description">Secure data handling with user authentication</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CTA SECTION ==================== -->
+    <section id="contact" class="cta-section">
+        <div class="container-lg">
+            <div class="cta-content text-center">
+                <!-- CTA Heading -->
+                <h2 class="cta-title mb-3">Get in Touch</h2>
+                
+                <!-- CTA Description -->
+                <p class="cta-subtitle mb-5">Have questions? We're here to help</p>
+                
+                <!-- CTA Button -->
+                <button class="btn btn-primary btn-lg px-5" aria-label="Send Message">
+                    <i class="fas fa-envelope me-2"></i>Send Message
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="container-lg">
+            <div class="footer-content text-center">
+                <p class="footer-text">&copy; 2026 SmartAmbulance. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== HOME MAP CONTAINER ==================== -->
+    <div id="homeMapContainer" class="home-map-container" style="display: none;">
+        <!-- Google Map -->
+        <div id="homeMap"></div>
+        
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <button class="map-control-btn confirm" onclick="confirmEmergencyFromMap()" aria-label="Confirm Emergency">
+                <i class="fas fa-check me-2"></i>Confirm Emergency
+            </button>
+            <button class="map-control-btn cancel" onclick="cancelMapView()" aria-label="Cancel and Close">
+                <i class="fas fa-times me-2"></i>Cancel
+            </button>
+        </div>
+        
+        <!-- Map Legend -->
+        <div class="map-legend">
+            <div style="font-weight: 600; margin-bottom: 10px; color: #1a2332;">Location Legend</div>
+            <div class="legend-item">
+                <div class="legend-dot user"></div>
+                <span>Your Location</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot hospital"></div>
+                <span>Nearby Hospitals (5-10 km)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOADING SPINNER MODAL ==================== -->
+    <div id="locationSpinner" class="location-spinner-overlay" style="display: none;">
+        <div class="location-spinner-container">
+            <!-- Animated Spinner -->
+            <div class="location-spinner">
+                <svg class="spinner-svg" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                    <!-- GPS Signal Rings -->
+                    <circle cx="25" cy="25" r="3" fill="#00d4ff" />
+                    <circle cx="25" cy="25" r="8" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.8" class="pulse-ring-1" />
+                    <circle cx="25" cy="25" r="13" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.6" class="pulse-ring-2" />
+                    <circle cx="25" cy="25" r="18" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.4" class="pulse-ring-3" />
+                </svg>
+            </div>
+            
+            <!-- Loading Text -->
+            <h3 class="spinner-title">Fetching Your Location</h3>
+            <p class="spinner-description">Accessing device GPS...</p>
+            
+            <!-- Progress Indicator -->
+            <div class="spinner-progress">
+                <div class="progress-bar-animated"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOGIN MODAL ==================== -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content login-modal-content">
+                <div class="modal-header login-modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">
+                        <i class="fas fa-sign-in-alt me-2"></i>Access Your Account
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body login-modal-body">
+                    <p class="login-modal-description">Choose how you'd like to access SmartAmbulance</p>
+                    
+                    <!-- Login Options -->
+                    <div class="login-options">
+                        <!-- User Login Option -->
+                        <a href="/user-login" class="login-option-card">
+                            <div class="login-option-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="login-option-content">
+                                <h6 class="login-option-title">User Login</h6>
+                                <p class="login-option-description">Access personalized features (optional)</p>
+                            </div>
+                            <i class="fas fa-arrow-right login-option-arrow"></i>
+                        </a>
+                        
+                        <!-- Driver Login Option -->
+                        <a href="/driver-login" class="login-option-card">
+                            <div class="login-option-icon">
+                                <i class="fas fa-car-side"></i>
+                            </div>
+                            <div class="login-option-content">
+                                <h6 class="login-option-title">Driver Login</h6>
+                                <p class="login-option-description">Access ambulance dispatch and tracking</p>
+                            </div>
+                            <i class="fas fa-arrow-right login-option-arrow"></i>
+                        </a>
+                        
+                        <!-- Hospital Login Option -->
+                        <a href="/hospital-login" class="login-option-card">
+                            <div class="login-option-icon">
+                                <i class="fas fa-hospital"></i>
+                            </div>
+                            <div class="login-option-content">
+                                <h6 class="login-option-title">Hospital Login</h6>
+                                <p class="login-option-description">Manage ambulance coordination and resources</p>
+                            </div>
+                            <i class="fas fa-arrow-right login-option-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer login-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Continue Without Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <!-- Bootstrap 5 Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Google Maps API removed - now only used on emergency page -->
+    
+    <!-- Custom Application JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script>
+        /**
+         * Store emergency location for confirmation
+         */
+        let emergencyLocationData = null;
+
+        /**
+         * Handle map view cancellation
+         * Hide the map and return to normal page view
+         */
+        function cancelMapView() {
+            HomeMapModule.hide();
+            
+            // Re-enable emergency button
+            const btn = document.querySelector('.btn-emergency');
+            btn.disabled = false;
+            
+            console.log('[EMERGENCY-FLOW] Map view cancelled');
+        }
+
+        /**
+         * Confirm emergency after viewing map
+         * Proceed with emergency dispatch
+         */
+        function confirmEmergencyFromMap() {
+            // Hide map
+            HomeMapModule.hide();
+            
+            // Show loading spinner
+            const spinner = document.getElementById('locationSpinner');
+            spinner.style.display = 'flex';
+            
+            // Send emergency with stored location data
+            sendEmergencyWithLocation(
+                emergencyLocationData.latitude,
+                emergencyLocationData.longitude,
+                emergencyLocationData.accuracy
+            );
+        }
+
+        /**
+         * Trigger Emergency Dispatch
+         * Step 1: Show map with user location and nearby hospitals
+         * Step 2: Allow user to confirm or cancel
+         * Step 3: If confirmed, proceed with emergency dispatch
+         */
+        function triggerEmergency() {
+            if (!confirm('Are you sure you want to send an emergency alert?')) {
+                return;
+            }
+            
+            console.log('[EMERGENCY-FLOW] Emergency button clicked');
+            
+            // Disable the button
+            const btn = document.querySelector('.btn-emergency');
+            btn.disabled = true;
+            
+            // Step 1: Get user location first
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    // Success callback - location obtained
+                    function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        
+                        console.log(`[EMERGENCY-FLOW] Location obtained: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${accuracy}m)`);
+                        
+                        // Store location for emergency confirmation
+                        emergencyLocationData = {
+                            latitude: latitude,
+                            longitude: longitude,
+                            accuracy: accuracy,
+                            source: 'device_gps'
+                        };
+                        
+                        // Step 2: Show map with location and nearby hospitals
+                        initializeEmergencyMap();
+                    },
+                    // Error callback - location denied or unavailable
+                    function(error) {
+                        console.warn(`[EMERGENCY-FLOW] Location error: ${error.message}`);
+                        
+                        // Fallback: Use default coordinates
+                        const fallbackLat = 25.2048;
+                        const fallbackLng = 55.2708;
+                        
+                        console.log('[EMERGENCY-FLOW] Using fallback location');
+                        alert(`Location access denied. Using default emergency location.\n\nCoordinates: ${fallbackLat.toFixed(4)}, ${fallbackLng.toFixed(4)}`);
+                        
+                        // Store fallback location
+                        emergencyLocationData = {
+                            latitude: fallbackLat,
+                            longitude: fallbackLng,
+                            accuracy: null,
+                            source: 'fallback'
+                        };
+                        
+                        // Show map with fallback location
+                        initializeEmergencyMap();
+                    },
+                    // Options for geolocation
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                // Geolocation not supported - use fallback
+                console.warn('[EMERGENCY-FLOW] Geolocation API not supported by browser');
+                
+                const fallbackLat = 25.2048;
+                const fallbackLng = 55.2708;
+                
+                alert('Geolocation not available. Using default location.');
+                
+                emergencyLocationData = {
+                    latitude: fallbackLat,
+                    longitude: fallbackLng,
+                    accuracy: null,
+                    source: 'fallback'
+                };
+                
+                initializeEmergencyMap();
+            }
+            
+            /**
+             * Initialize the emergency map view
+             * Shows user location and nearby hospitals
+             */
+            async function initializeEmergencyMap() {
+                try {
+                    console.log('[EMERGENCY-FLOW] Redirecting to emergency page...');
+                    // Redirect to the new emergency response page
+                    window.location.href = '/emergency';
+                } catch (error) {
+                    console.error('[EMERGENCY-FLOW] Error redirecting:', error);
+                    alert('Error loading emergency page. Please try again.');
+                }
+            }
+        }
+        
+        /**
+         * Send emergency request with location data
+         * 
+         * @param {number} latitude - User latitude
+         * @param {number} longitude - User longitude
+         * @param {number|null} accuracy - Location accuracy in meters
+         */
+        function sendEmergencyWithLocation(latitude, longitude, accuracy) {
+            // Update spinner text while sending request
+            const spinnerTitle = document.querySelector('.spinner-title');
+            const spinnerDesc = document.querySelector('.spinner-description');
+            spinnerTitle.textContent = 'Sending Emergency Alert';
+            spinnerDesc.textContent = 'Contacting nearest ambulance...';
+            
+            console.log('[EMERGENCY-FLOW] Sending emergency request with location...');
+            
+            // Send POST request with location coordinates
+            fetch('/emergency', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    user_agent: navigator.userAgent,
+                    latitude: latitude,
+                    longitude: longitude,
+                    accuracy: accuracy,
+                    location_method: accuracy !== null ? 'device_gps' : 'fallback'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('[EMERGENCY-FLOW] Emergency request sent successfully:', data);
+                // Hide spinner and redirect
+                const spinner = document.getElementById('locationSpinner');
+                spinner.style.display = 'none';
+                
+                // Redirect to emergency confirmation page with location params
+                window.location.href = `/emergency?lat=${latitude}&lng=${longitude}&accuracy=${accuracy || ''}`;
+            })
+            .catch(error => {
+                console.error('[EMERGENCY-FLOW] Error sending emergency request:', error);
+                // Hide spinner and redirect anyway
+                const spinner = document.getElementById('locationSpinner');
+                spinner.style.display = 'none';
+                
+                // Redirect to emergency page even without confirmation
+                window.location.href = `/emergency?lat=${latitude}&lng=${longitude}&accuracy=${accuracy || ''}`;
+            });
+        }
+
+        // ==================== PROFILE DROPDOWN FUNCTIONALITY ====================
+        
+        // Initialize profile dropdown on page load
+        function initializeProfileDropdown() {
+            const loginItem = document.getElementById('navLoginItem');
+            const profileItem = document.getElementById('navProfileItem');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const profileInitials = document.getElementById('profileInitials');
+            const profileAvatarCircle = document.getElementById('profileAvatarCircle');
+            const profileFullNameLarge = document.getElementById('profileFullNameLarge');
+            const profilePhoneLarge = document.getElementById('profilePhoneLarge');
+            const profileCNICLarge = document.getElementById('profileCNICLarge');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            // Check if user is logged in (from sessionStorage)
+            const userFullName = sessionStorage.getItem('full_name');
+            const userPhone = sessionStorage.getItem('phone');
+            const userCNIC = sessionStorage.getItem('cnic');
+            const profilePhoto = sessionStorage.getItem('profilePhoto');
+
+            if (userFullName && userCNIC) {
+                // User is logged in - show profile dropdown
+                loginItem.style.display = 'none';
+                profileItem.style.display = 'block';
+
+                // Calculate initials
+                const initials = userFullName
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase())
+                    .join('')
+                    .slice(0, 2);
+
+                // Populate profile information
+                userNameDisplay.textContent = userFullName.split(' ')[0]; // First name
+                
+                // Display profile photo or initials
+                if (profilePhoto) {
+                    profileAvatarCircle.innerHTML = `<img src="${profilePhoto}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    profileInitials.textContent = initials;
+                }
+                
+                profileFullNameLarge.textContent = userFullName;
+                profilePhoneLarge.textContent = userPhone || 'Not provided';
+                profileCNICLarge.textContent = userCNIC;
+            } else {
+                // User is not logged in - show login button
+                loginItem.style.display = 'block';
+                profileItem.style.display = 'none';
+            }
+
+            // Logout button functionality
+            logoutBtn.addEventListener('click', () => {
+                // Clear session storage
+                sessionStorage.removeItem('user_id');
+                sessionStorage.removeItem('full_name');
+                sessionStorage.removeItem('phone');
+                sessionStorage.removeItem('cnic');
+                sessionStorage.removeItem('profilePhoto');
+
+                // Redirect to home
+                window.location.href = '/';
+            });
+
+            // Close dropdown when clicked outside
+            document.addEventListener('click', (e) => {
+                const dropdown = document.querySelector('.profile-dropdown');
+                const profileBtn = document.getElementById('profileDropdown');
+                
+                if (dropdown && profileBtn) {
+                    if (!e.target.closest('.dropdown')) {
+                        // Click outside dropdown - close it
+                        const bsDropdown = new bootstrap.Dropdown(profileBtn);
+                        bsDropdown.hide();
+                    }
+                }
+            });
+        }
+
+        // Edit profile modal functionality
+        function initializeEditProfileModal() {
+            const editFullNameInput = document.getElementById('editFullName');
+            const editPhoneInput = document.getElementById('editPhone');
+            const saveProfileBtn = document.getElementById('saveProfileBtn');
+            const editProfileModal = document.getElementById('editProfileModal');
+            const profilePhotoInput = document.getElementById('profilePhotoInput');
+            const profilePhotoWrapper = document.getElementById('profilePhotoWrapper');
+            const editProfileAvatarPreview = document.getElementById('editProfileAvatarPreview');
+            const editProfileInitials = document.getElementById('editProfileInitials');
+
+            // Handle profile photo upload
+            profilePhotoWrapper.addEventListener('click', (e) => {
+                e.preventDefault();
+                profilePhotoInput.click();
+            });
+
+            profilePhotoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        return;
+                    }
+
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select a valid image file');
+                        return;
+                    }
+
+                    // Read file and convert to base64
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        // Store photo in sessionStorage
+                        sessionStorage.setItem('profilePhoto', event.target.result);
+                        
+                        // Display in avatar preview
+                        editProfileAvatarPreview.innerHTML = `<img src="${event.target.result}" alt="Profile Photo">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Populate form with current user data when modal opens
+            const editProfileModalEl = editProfileModal ? new bootstrap.Modal(editProfileModal) : null;
+            
+            if (editProfileModal) {
+                editProfileModal.addEventListener('show.bs.modal', () => {
+                    editFullNameInput.value = sessionStorage.getItem('full_name') || '';
+                    editPhoneInput.value = sessionStorage.getItem('phone') || '';
+                    
+                    // Load and display existing profile photo
+                    const existingPhoto = sessionStorage.getItem('profilePhoto');
+                    const fullName = sessionStorage.getItem('full_name') || '';
+                    
+                    if (existingPhoto) {
+                        editProfileAvatarPreview.innerHTML = `<img src="${existingPhoto}" alt="Profile Photo">`;
+                    } else {
+                        // Show initials
+                        const initials = fullName
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase())
+                            .join('')
+                            .slice(0, 2);
+                        editProfileAvatarPreview.innerHTML = `<span>${initials}</span>`;
+                    }
+                });
+            }
+
+            // Save profile changes
+            saveProfileBtn.addEventListener('click', async () => {
+                const fullName = editFullNameInput.value.trim();
+                const phone = editPhoneInput.value.trim();
+                const cnic = sessionStorage.getItem('cnic');
+
+                // Validation
+                if (!fullName || !phone) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                if (fullName.length < 3) {
+                    alert('Full name must be at least 3 characters');
+                    return;
+                }
+
+                // Check phone format: exactly 11 digits and starts with 03
+                if (phone.length !== 11) {
+                    alert('Phone number must be exactly 11 digits');
+                    return;
+                }
+                
+                if (!phone.startsWith('03')) {
+                    alert('Phone number must start with 03');
+                    return;
+                }
+                
+                if (!/^\d+$/.test(phone)) {
+                    alert('Phone number must contain only digits');
+                    return;
+                }
+
+                // Show loading state
+                saveProfileBtn.disabled = true;
+                saveProfileBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+
+                try {
+                    const response = await fetch('/user-update-profile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cnic: cnic,
+                            full_name: fullName,
+                            phone: phone
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Update sessionStorage
+                        sessionStorage.setItem('full_name', fullName);
+                        sessionStorage.setItem('phone', phone);
+
+                        // Close modal and show success message
+                        const modal = bootstrap.Modal.getInstance(editProfileModal);
+                        modal.hide();
+
+                        // Calculate initials
+                        const initials = fullName
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase())
+                            .join('')
+                            .slice(0, 2);
+
+                        // Update navbar and profile dropdown display
+                        document.getElementById('userNameDisplay').textContent = fullName.split(' ')[0];
+                        document.getElementById('profileFullNameLarge').textContent = fullName;
+                        document.getElementById('profilePhoneLarge').textContent = phone;
+
+                        // Update avatar - show photo if exists, otherwise show initials
+                        const profilePhoto = sessionStorage.getItem('profilePhoto');
+                        const profileAvatarCircle = document.getElementById('profileAvatarCircle');
+                        if (profilePhoto) {
+                            profileAvatarCircle.innerHTML = `<img src="${profilePhoto}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        } else {
+                            const profileInitials = document.getElementById('profileInitials');
+                            profileInitials.textContent = initials;
+                            profileAvatarCircle.innerHTML = '';
+                            profileAvatarCircle.appendChild(profileInitials);
+                        }
+
+                        // Show success alert
+                        showSuccessMessage('Profile updated successfully!');
+                    } else {
+                        alert(data.message || 'Failed to update profile');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Connection error. Please try again.');
+                } finally {
+                    saveProfileBtn.disabled = false;
+                    saveProfileBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+                }
+            });
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 300px; background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88;';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+
+            // Auto-remove after 4 seconds
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeProfileDropdown();
+            initializeEditProfileModal();
+        });
+    </script>
+</body>
+</html>

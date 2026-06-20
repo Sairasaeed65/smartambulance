@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Reports - SmartAmbulance Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+
+        :root {
+            --bg-page:           #f0f5ff;
+            --surface-card:      #ffffff;
+            --surface-panel:     #ffffff;
+            --surface-header:    #47627d;
+            --surface-header-alt:#ffffff;
+            --surface-row-alt:   #f8fafc;
+            --surface-row-hover: #eef4fb;
+            --border-soft:       #d1d5db;
+            --border-strong:     #9ca3af;
+            --shadow-soft:       0 2px 8px rgba(15,23,42,0.06);
+            --shadow-medium:     0 8px 18px rgba(15,23,42,0.10);
+            --sidebar-bg1:       #0c1a2e;
+            --sidebar-bg2:       #0f2040;
+            --sidebar-bg3:       #0a1628;
+            --card-bg:           #ffffff;
+            --card-border:       #c7d7f9;
+            --card-shadow:       0 2px 12px rgba(37,99,235,0.08);
+            --card-shadow-hover: 0 8px 24px rgba(37,99,235,0.15);
+            --accent:            #2563eb;
+            --accent-dark:       #1d4ed8;
+            --accent-pale:       #eff6ff;
+            --accent-soft:       #dbeafe;
+            --accent-border:     #93c5fd;
+            --text-primary:      #0c1a2e;
+            --text-secondary:    #1e3a5f;
+            --text-muted:        #5b7fa6;
+            --text-hint:         #93aec8;
+            --success:           #15803d;
+            --success-bg:        #f0fdf4;
+            --success-border:    #86efac;
+            --warning:           #b45309;
+            --warning-bg:        #fffbeb;
+            --warning-border:    #fcd34d;
+            --danger:            #dc2626;
+            --danger-bg:         #fff1f2;
+            --danger-border:     #fca5a5;
+            --divider:           #dbeafe;
+        }
+
+        body { background: var(--bg-page); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f5ff; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
+
+        /* ========= SIDEBAR ========= */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(170deg, var(--sidebar-bg1) 0%, var(--sidebar-bg2) 50%, var(--sidebar-bg3) 100%);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 20px 18px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: white;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-logo .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-label {
+            font-size: 8px; font-weight: 800;
+            color: rgba(255,255,255,0.2);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 0 18px; margin: 10px 0 5px;
+        }
+
+        .sidebar-nav { flex: 1; padding: 4px 0; animation: slideInLeft 0.5s ease; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; margin: 1px 8px;
+            border-radius: 9px;
+            color: rgba(255,255,255,0.5);
+            transition: all 0.2s ease;
+            cursor: pointer; font-weight: 600; font-size: 0.72rem;
+            border: 1px solid transparent; text-decoration: none;
+        }
+
+        .nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(37,99,235,0.45), rgba(29,78,216,0.3));
+            border-color: rgba(147,197,253,0.3);
+            box-shadow: 0 2px 12px rgba(37,99,235,0.2);
+        }
+
+        .nav-item .nav-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: rgba(255,255,255,0.07);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; flex-shrink: 0;
+        }
+
+        .nav-item.active .nav-icon { background: rgba(37,99,235,0.35); }
+
+        .nav-item.nav-danger { color: rgba(252,165,165,0.7); }
+        .nav-item.nav-danger:hover { color: #fca5a5; background: rgba(239,68,68,0.12); }
+        .nav-item.nav-danger .nav-icon { background: rgba(239,68,68,0.1); }
+
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 14px; }
+
+        .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 14px; }
+
+        .admin-info-card {
+            background: rgba(37,99,235,0.15);
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 10px; padding: 12px; text-align: center;
+        }
+
+        .admin-avatar {
+            width: 42px; height: 42px; margin: 0 auto 8px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1rem; color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+        }
+
+        .admin-name { color: white; font-weight: 700; font-size: 0.65rem; }
+        .admin-role { color: rgba(255,255,255,0.4); font-size: 0.65rem; margin-bottom: 10px; }
+
+        /* ========= MAIN CONTENT ========= */
+        .main-content {
+            flex: 1; margin-left: 240px;
+            display: flex; flex-direction: column;
+            min-height: 100vh; background: var(--bg-page);
+        }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 11px 22px;
+            background: #0f172a;
+            border-bottom: none; box-shadow: none;
+            position: sticky; top: 0; z-index: 90;
+        }
+
+        .header-title { display: flex; flex-direction: column; }
+        .htitle-row { display: flex; align-items: center; gap: 10px; }
+
+        .header-title .header-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(37,99,235,0.35); flex-shrink: 0;
+        }
+
+        .htitle-main { font-size: 14px; font-weight: 700; color: #ffffff; }
+        .htitle-section { color: #475569; font-size: 12px; font-weight: 400; margin-left: 4px; }
+
+        .header-controls { display: flex; align-items: center; gap: 10px; }
+
+        .live-clock {
+            background: #1e293b; border: none;
+            padding: 6px 14px; border-radius: 8px; text-align: center;
+        }
+
+        .live-clock-time { color: #ffffff; display: block; font-size: 14px; font-weight: 700; line-height: 1.3; }
+        .live-clock-date { color: #64748b; font-size: 10px; }
+
+        .hdr-sep { width: 1px; height: 28px; background: #334155; flex-shrink: 0; }
+
+        .avatar-wrap { position: relative; cursor: pointer; }
+
+        .chip-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; font-size: 0.7rem;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.4); user-select: none;
+        }
+
+        .avatar-popup {
+            display: none; position: absolute; right: 0; top: calc(100% + 8px);
+            background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+            padding: 8px; min-width: 160px; z-index: 200;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
+        .avatar-wrap.open .avatar-popup { display: block; }
+
+        .av-name {
+            padding: 8px 10px 6px; font-size: 0.72rem; font-weight: 700;
+            color: #cbd5e1; display: flex; align-items: center; gap: 7px;
+            border-bottom: 1px solid #334155; margin-bottom: 4px;
+        }
+
+        .av-logout {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 10px; border-radius: 7px; font-size: 0.72rem; font-weight: 700;
+            color: #f87171; text-decoration: none; transition: background 0.15s;
+        }
+
+        .av-logout:hover { background: rgba(239,68,68,0.12); }
+
+        .htitle-sub { display: flex; align-items: center; gap: 5px; color: #4ade80; font-size: 10px; margin-top: 3px; }
+
+        .htitle-sub-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+            flex-shrink: 0; animation: pulse-hdr 1.5s infinite;
+        }
+
+        @keyframes pulse-hdr {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.45; transform:scale(0.8); }
+        }
+
+        /* ========= PAGE BODY ========= */
+        .page-body { padding: 18px 22px; }
+
+        /* ========= SUMMARY CARDS ========= */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin-bottom: 24px;
+        }
+
+        .sum-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 13px;
+            padding: 18px 16px 14px;
+            box-shadow: var(--shadow-soft);
+            position: relative; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .sum-card:nth-child(1) { animation-delay: 0.05s; }
+        .sum-card:nth-child(2) { animation-delay: 0.10s; }
+        .sum-card:nth-child(3) { animation-delay: 0.15s; }
+        .sum-card:nth-child(4) { animation-delay: 0.20s; }
+
+        .sum-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3.5px;
+            border-radius: 13px 13px 0 0;
+        }
+
+        .sum-card.red::before    { background: linear-gradient(90deg, #dc2626, #f87171); }
+        .sum-card.green::before  { background: linear-gradient(90deg, #15803d, #4ade80); }
+        .sum-card.blue::before   { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+        .sum-card.purple::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+        .sum-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--border-strong);
+        }
+
+        .sum-icon {
+            width: 40px; height: 40px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; margin-bottom: 12px; border: 1px solid;
+        }
+
+        .sum-card.red    .sum-icon { background: #fff1f2; border-color: #fca5a5; color: #dc2626; }
+        .sum-card.green  .sum-icon { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+        .sum-card.blue   .sum-icon { background: #eff6ff; border-color: #93c5fd; color: #2563eb; }
+        .sum-card.purple .sum-icon { background: #f5f3ff; border-color: #c4b5fd; color: #7c3aed; }
+
+        .sum-label {
+            font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;
+        }
+
+        .sum-card.red    .sum-label { color: #dc2626; }
+        .sum-card.green  .sum-label { color: #16a34a; }
+        .sum-card.blue   .sum-label { color: #2563eb; }
+        .sum-card.purple .sum-label { color: #7c3aed; }
+
+        .sum-value { font-size: 1.9rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+
+        .sum-card.red    .sum-value { color: #dc2626; }
+        .sum-card.green  .sum-value { color: #15803d; }
+        .sum-card.blue   .sum-value { color: #1d4ed8; }
+        .sum-card.purple .sum-value { color: #6d28d9; }
+
+        .sum-sub { font-size: 0.62rem; color: var(--text-hint); }
+
+        /* ========= SECTION HEADERS ========= */
+        .section-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px; margin-top: 8px;
+        }
+
+        .section-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; font-weight: 800; color: var(--text-primary);
+        }
+
+        .section-title .s-icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.7rem;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        }
+
+        .section-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* ========= CHART CARDS ========= */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px; margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 13px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease 0.25s both;
+        }
+
+        .chart-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 18px 12px;
+            border-bottom: 1px solid var(--border-soft);
+            background: var(--surface-header);
+        }
+
+        .chart-card-title {
+            display: flex; align-items: center; gap: 9px;
+            font-size: 0.75rem; font-weight: 800; color: #f8fbff;
+        }
+
+        .chart-card-title .cc-icon {
+            width: 24px; height: 24px; border-radius: 6px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.6rem;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+        }
+
+        .chart-card-body {
+            padding: 18px 20px;
+            background: var(--surface-panel);
+        }
+
+        .chart-wrap-bar  { height: 220px; position: relative; }
+        .chart-wrap-pie  { height: 220px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .chart-wrap-line { height: 220px; position: relative; }
+
+        /* ========= DATA TABLES ========= */
+        .data-table-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 13px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.5s ease 0.3s both;
+        }
+
+        .dtc-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-soft);
+            background: var(--surface-header);
+        }
+
+        .dtc-title {
+            display: flex; align-items: center; gap: 9px;
+            font-size: 0.75rem; font-weight: 800;
+            color: #f8fbff; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .dtc-title .dtc-icon {
+            width: 26px; height: 26px; border-radius: 7px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.62rem;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        }
+
+        .dtc-badge {
+            font-size: 0.68rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px;
+            background: rgba(255,255,255,0.14); color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.24);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .data-table thead th {
+            padding: 10px 14px;
+            font-size: 0.64rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.6px;
+            color: #1f2937; background: #ffffff;
+            border-bottom: 1px solid var(--border-soft);
+            white-space: nowrap; text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-right: 1px solid var(--border-soft);
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .data-table tbody tr:nth-child(odd) { background: var(--surface-card); }
+        .data-table tbody tr:nth-child(even) { background: var(--surface-row-alt); }
+        .data-table tbody tr:first-child { background: var(--surface-panel); }
+        .data-table tbody tr:hover {
+            background: var(--surface-row-hover);
+            box-shadow: inset 3px 0 0 #3b82f6;
+        }
+
+        /* Subtle visual differentiation between the two report tables */
+        .hospital-table-card .dtc-header {
+            background: var(--surface-header);
+        }
+        .hospital-table thead th { background: #edf2ff; }
+        .hospital-table tbody tr:nth-child(odd) { background: var(--surface-card); }
+        .hospital-table tbody tr:nth-child(even) { background: #f7f9ff; }
+        .hospital-table tbody tr:first-child { background: #f2f6ff; }
+        .hospital-table tbody tr:hover {
+            background: #ebf2ff;
+            box-shadow: inset 3px 0 0 #2563eb;
+        }
+
+        .driver-table-card .dtc-header {
+            background: var(--surface-header);
+        }
+        .driver-table thead th { background: #ecfbff; }
+        .driver-table tbody tr:nth-child(odd) { background: var(--surface-card); }
+        .driver-table tbody tr:nth-child(even) { background: #f7fcfe; }
+        .driver-table tbody tr:first-child { background: #f2fbff; }
+        .driver-table tbody tr:hover {
+            background: #e8f7ff;
+            box-shadow: inset 3px 0 0 #0891b2;
+        }
+
+        .data-table tbody td {
+            padding: 12px 14px; font-size: 0.74rem;
+            color: #0f172a; vertical-align: middle;
+            border-bottom: 1px solid var(--border-soft);
+            border-right: 1px solid var(--border-soft);
+        }
+
+        .data-table tbody td:last-child,
+        .data-table thead th:last-child { border-right: none; }
+
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        /* ========= RATING BADGES ========= */
+        .rating-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.61rem; font-weight: 800; border: 1px solid; white-space: nowrap;
+        }
+
+        .rating-excellent { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+        .rating-good      { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+        .rating-poor      { background: #fff1f2; color: #dc2626; border-color: #fca5a5; }
+        .rating-na        { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
+
+        /* ========= PROGRESS BAR ========= */
+        .progress-wrap { display: flex; align-items: center; gap: 8px; }
+
+        .progress-bar-bg {
+            flex: 1; height: 6px; border-radius: 3px;
+            background: #e2e8f0; overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 0;
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
+            transition: width 0.6s ease;
+        }
+
+        .progress-pct { font-size: 0.68rem; font-weight: 700; color: var(--accent); min-width: 32px; }
+
+        /* ========= EMPTY STATE ========= */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 20px; color: var(--text-hint);
+        }
+
+        .empty-state i { font-size: 2rem; margin-bottom: 10px; color: #c7d7f9; }
+        .empty-state p { font-size: 0.76rem; font-weight: 600; }
+
+        /* ========= TOAST ========= */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+
+        .toast {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px; border-radius: 11px;
+            font-size: 0.78rem; font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.14);
+            border: 1px solid; animation: slideInToast 0.3s ease; max-width: 320px;
+        }
+
+        .toast.success { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+        .toast.error { background: #fff1f2; color: #dc2626; border-color: #fca5a5; }
+
+        /* ========= ANIMATIONS ========= */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateX(30px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ========= RESPONSIVE ========= */
+        @media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px)  { .charts-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px)  { .sidebar { display: none; } .main-content { margin-left: 0; } .summary-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+
+<!-- =========== SIDEBAR =========== -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+        <div>
+            <div>SmartAmbulance</div>
+            <div style="font-size:0.6rem;font-weight:500;color:rgba(255,255,255,0.35);margin-top:1px;">Admin Control Panel</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+
+        <a href="/admin-dashboard" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
+            Dashboard
+        </a>
+
+        <a href="/admin-hospitals" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-hospital"></i></div>
+            Hospitals
+        </a>
+
+        <a href="/admin-drivers" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-id-card"></i></div>
+            Drivers
+        </a>
+
+        <a href="/admin-emergencies" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-ambulance"></i></div>
+            Emergencies
+        </a>
+
+        <a href="/admin-users" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-users"></i></div>
+            Users
+        </a>
+
+        <a href="/admin-reports" class="nav-item active">
+            <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
+            Reports
+        </a>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">Account</div>
+
+        <a href="/admin-settings" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-cog"></i></div>
+            Settings
+        </a>
+
+        <a href="/admin-logout" class="nav-item nav-danger">
+            <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
+            Logout
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="admin-info-card">
+            <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+            <div class="admin-name">{{ admin_username }}</div>
+            <div class="admin-role">System Administrator</div>
+        </div>
+    </div>
+</aside>
+
+<!-- =========== MAIN CONTENT =========== -->
+<div class="main-content">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <div class="htitle-row">
+                <div class="header-icon"><i class="fas fa-chart-bar"></i></div>
+                <div>
+                    <div class="htitle-main">System Reports <span class="htitle-section">/ Analytics</span></div>
+                    <div class="htitle-sub"><span class="htitle-sub-dot"></span> All systems live</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <div class="live-clock">
+                <span class="live-clock-time" id="liveClock">--:--:--</span>
+                <span class="live-clock-date" id="liveDate">Loading...</span>
+            </div>
+            <div class="hdr-sep"></div>
+            <div class="avatar-wrap" id="avatarWrap">
+                <div class="chip-avatar" onclick="document.getElementById('avatarWrap').classList.toggle('open')">{{ admin_username[0]|upper if admin_username else 'A' }}</div>
+                <div class="avatar-popup">
+                    <div class="av-name"><i class="fas fa-user-shield"></i> {{ admin_username }}</div>
+                    <a href="/admin-logout" class="av-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page body -->
+    <div class="page-body">
+
+        <!-- Page heading -->
+        <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:1.15rem;font-weight:800;color:var(--text-primary);">Analytics &amp; Reports</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+                    Real-time data from the SmartAmbulance system database.
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== SUMMARY CARDS ====== -->
+        <div class="summary-grid">
+
+            <div class="sum-card red">
+                <div class="sum-icon"><i class="fas fa-ambulance"></i></div>
+                <div class="sum-label">Total Emergencies</div>
+                <div class="sum-value">{{ summary.total_emergencies }}</div>
+                <div class="sum-sub">All time requests</div>
+            </div>
+
+            <div class="sum-card green">
+                <div class="sum-icon"><i class="fas fa-hospital-user"></i></div>
+                <div class="sum-label">Approved Hospitals</div>
+                <div class="sum-value">{{ summary.approved_hospitals }}</div>
+                <div class="sum-sub">Active in dispatch system</div>
+            </div>
+
+            <div class="sum-card blue">
+                <div class="sum-icon"><i class="fas fa-id-card"></i></div>
+                <div class="sum-label">Active Drivers</div>
+                <div class="sum-value">{{ summary.active_drivers }}</div>
+                <div class="sum-sub">Currently available</div>
+            </div>
+
+            <div class="sum-card purple">
+                <div class="sum-icon"><i class="fas fa-clock"></i></div>
+                <div class="sum-label">System Uptime</div>
+                <div class="sum-value" style="font-size:1.35rem;">{{ summary.uptime }}</div>
+                <div class="sum-sub">Since first request</div>
+            </div>
+
+        </div>
+
+        <!-- ====== SECTION 1: EMERGENCY TRENDS ====== -->
+        <div class="section-row">
+            <div>
+                <div class="section-title">
+                    <div class="s-icon"><i class="fas fa-chart-bar"></i></div>
+                    Emergency Trends
+                </div>
+                <div class="section-sub">Last 7 days emergency volume and current status distribution</div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <!-- Bar chart: 7-day trend -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-card-title">
+                        <div class="cc-icon"><i class="fas fa-chart-bar"></i></div>
+                        Last 7 Days — Emergency Count
+                    </div>
+                </div>
+                <div class="chart-card-body">
+                    <div class="chart-wrap-bar">
+                        <canvas id="chart7Days"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie chart: status breakdown -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-card-title">
+                        <div class="cc-icon"><i class="fas fa-chart-pie"></i></div>
+                        Status Breakdown — All Time
+                    </div>
+                </div>
+                <div class="chart-card-body">
+                    <div class="chart-wrap-pie">
+                        {% if status_breakdown %}
+                        <canvas id="chartStatus"></canvas>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-chart-pie"></i>
+                            <p>No data yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== SECTION 2: HOSPITAL PERFORMANCE ====== -->
+        <div class="section-row">
+            <div>
+                <div class="section-title">
+                    <div class="s-icon"><i class="fas fa-hospital"></i></div>
+                    Hospital Performance
+                </div>
+                <div class="section-sub">Response times and success rates per hospital</div>
+            </div>
+        </div>
+
+        <div class="data-table-card hospital-table-card" style="margin-bottom:24px;">
+            <div class="dtc-header">
+                <div class="dtc-title">
+                    <div class="dtc-icon"><i class="fas fa-hospital"></i></div>
+                    Hospital Statistics
+                </div>
+                <span class="dtc-badge">{{ hospital_perf|length }} hospitals</span>
+            </div>
+
+            {% if hospital_perf %}
+            <table class="data-table hospital-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Hospital</th>
+                        <th>Total Handled</th>
+                        <th>Completed</th>
+                        <th>Success Rate</th>
+                        <th>Avg Response</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in hospital_perf %}
+                    <tr>
+                        <td style="color:var(--text-hint);font-size:0.67rem;font-weight:700;">{{ loop.index }}</td>
+                        <td>
+                            <div style="font-weight:700;font-size:0.76rem;">{{ h.name }}</div>
+                        </td>
+                        <td>
+                            <span style="font-weight:700;color:var(--text-primary);">{{ h.total }}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:700;color:#16a34a;">{{ h.completed }}</span>
+                        </td>
+                        <td>
+                            <div class="progress-wrap">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" data-width="{{ h.success_rate }}"></div>
+                                </div>
+                                <span class="progress-pct">{{ h.success_rate }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if h.avg_response_min is not none %}
+                                <span style="font-weight:700;color:var(--text-primary);">{{ h.avg_response_min }} min</span>
+                            {% else %}
+                                <span style="color:var(--text-hint);">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="rating-badge rating-{{ h.rating_cls }}">
+                                {% if h.rating_cls == 'excellent' %}<i class="fas fa-star"></i>
+                                {% elif h.rating_cls == 'good' %}<i class="fas fa-thumbs-up"></i>
+                                {% elif h.rating_cls == 'poor' %}<i class="fas fa-exclamation-triangle"></i>
+                                {% else %}<i class="fas fa-minus"></i>{% endif %}
+                                {{ h.rating }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-hospital"></i>
+                <p>No hospital data available yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ====== SECTION 3: DRIVER ACTIVITY ====== -->
+        <div class="section-row">
+            <div>
+                <div class="section-title">
+                    <div class="s-icon"><i class="fas fa-id-card"></i></div>
+                    Driver Activity
+                </div>
+                <div class="section-sub">Individual driver dispatch statistics and response performance</div>
+            </div>
+        </div>
+
+        <div class="data-table-card driver-table-card" style="margin-bottom:24px;">
+            <div class="dtc-header">
+                <div class="dtc-title">
+                    <div class="dtc-icon"><i class="fas fa-id-card"></i></div>
+                    Driver Statistics
+                </div>
+                <span class="dtc-badge">{{ driver_activity|length }} drivers</span>
+            </div>
+
+            {% if driver_activity %}
+            <table class="data-table driver-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Driver</th>
+                        <th>Hospital</th>
+                        <th>Total Dispatched</th>
+                        <th>Completed</th>
+                        <th>Avg Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in driver_activity %}
+                    <tr>
+                        <td style="color:var(--text-hint);font-size:0.67rem;font-weight:700;">{{ loop.index }}</td>
+                        <td>
+                            <div style="font-weight:700;font-size:0.76rem;">{{ d.name }}</div>
+                        </td>
+                        <td>
+                            <span style="font-size:0.71rem;color:var(--text-muted);">{{ d.hospital_name }}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:700;color:var(--text-primary);">{{ d.total }}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:700;color:#16a34a;">{{ d.completed }}</span>
+                        </td>
+                        <td>
+                            {% if d.avg_response_min is not none %}
+                                <span style="font-weight:700;color:var(--text-primary);">{{ d.avg_response_min }} min</span>
+                            {% else %}
+                                <span style="color:var(--text-hint);">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-id-card"></i>
+                <p>No driver activity data available yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ====== SECTION 4: DAILY ACTIVITY (30 DAYS) ====== -->
+        <div class="section-row">
+            <div>
+                <div class="section-title">
+                    <div class="s-icon"><i class="fas fa-chart-line"></i></div>
+                    Daily Activity — Last 30 Days
+                </div>
+                <div class="section-sub">Emergency request trend over the past month</div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px;animation-delay:0.35s;">
+            <div class="chart-card-header">
+                <div class="chart-card-title">
+                    <div class="cc-icon"><i class="fas fa-chart-line"></i></div>
+                    Emergencies Per Day — Last 30 Days
+                </div>
+            </div>
+            <div class="chart-card-body">
+                <div class="chart-wrap-line">
+                    <canvas id="chart30Days"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // Clock
+    function updateClock() {
+        var now = new Date();
+        document.getElementById('liveClock').textContent =
+            now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('liveDate').textContent =
+            now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    document.addEventListener('click', function(e) {
+        var wrap = document.getElementById('avatarWrap');
+        if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+
+    // ===== All-Stats Live Sync (every 30s) =====
+    function syncAllStats() {
+        fetch('/admin-api/all-stats')
+        .then(function(r) { return r.json(); })
+        .then(function(d) { /* stats available for future use */ })
+        .catch(function() {});
+    }
+    syncAllStats();
+    setInterval(syncAllStats, 30000);
+
+    // Apply server-side progress percentages without inline CSS expressions.
+    document.querySelectorAll('.progress-bar-fill').forEach(function(el) {
+        var raw = parseFloat(el.getAttribute('data-width'));
+        var safe = isNaN(raw) ? 0 : Math.max(0, Math.min(100, raw));
+        el.style.width = safe + '%';
+    });
+
+    // Chart.js defaults
+    Chart.defaults.font.family = "'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#5b7fa6';
+
+    // ---- 7-Day Bar Chart ----
+    var labels7 = {{ trend_7days | map(attribute='day') | list | tojson }};
+    var data7   = {{ trend_7days | map(attribute='cnt') | list | tojson }};
+
+    // Shorten labels to "Mon 29" style
+    var shortLabels7 = labels7.map(function(d) {
+        var dt = new Date(d + 'T00:00:00');
+        return dt.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+    });
+
+    new Chart(document.getElementById('chart7Days'), {
+        type: 'bar',
+        data: {
+            labels: shortLabels7,
+            datasets: [{
+                label: 'Emergencies',
+                data: data7,
+                backgroundColor: 'rgba(37,99,235,0.18)',
+                borderColor: '#2563eb',
+                borderWidth: 2,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0c1a2e',
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) { return ' ' + ctx.parsed.y + ' emergencies'; }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, border: { display: false } },
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: 'rgba(193,218,255,0.4)' },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+
+    // ---- Status Pie Chart ----
+    {% if status_breakdown %}
+    var pieLabels = {{ status_breakdown | map(attribute='status') | list | tojson }};
+    var pieData   = {{ status_breakdown | map(attribute='cnt')    | list | tojson }};
+
+    var pieColors = ['#2563eb','#16a34a','#ea580c','#dc2626','#7c3aed','#0891b2','#d97706'];
+
+    new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: pieColors.slice(0, pieLabels.length),
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 12,
+                        boxWidth: 12,
+                        font: { size: 11, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#0c1a2e',
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                            return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+
+    // ---- 30-Day Line Chart ----
+    var labels30 = {{ trend_30days | map(attribute='day') | list | tojson }};
+    var data30   = {{ trend_30days | map(attribute='cnt') | list | tojson }};
+
+    // Shorten to "Mar 1" style, show every 5th label
+    var shortLabels30 = labels30.map(function(d, i) {
+        if (i % 5 === 0 || i === labels30.length - 1) {
+            var dt = new Date(d + 'T00:00:00');
+            return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        return '';
+    });
+
+    new Chart(document.getElementById('chart30Days'), {
+        type: 'line',
+        data: {
+            labels: shortLabels30,
+            datasets: [{
+                label: 'Emergencies',
+                data: data30,
+                borderColor: '#2563eb',
+                backgroundColor: function(ctx) {
+                    var gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
+                    gradient.addColorStop(0, 'rgba(37,99,235,0.22)');
+                    gradient.addColorStop(1, 'rgba(37,99,235,0.0)');
+                    return gradient;
+                },
+                borderWidth: 2.5,
+                pointRadius: 3,
+                pointBackgroundColor: '#2563eb',
+                pointHoverRadius: 5,
+                fill: true,
+                tension: 0.4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0c1a2e',
+                    padding: 10,
+                    callbacks: {
+                        title: function(ctx) {
+                            return labels30[ctx[0].dataIndex];
+                        },
+                        label: function(ctx) { return ' ' + ctx.parsed.y + ' emergencies'; }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { maxRotation: 0 }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: 'rgba(193,218,255,0.4)' },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

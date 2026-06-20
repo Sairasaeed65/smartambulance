@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — SmartAmbulance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- REDESIGNED: standalone centered card, no two-column layout, no Bootstrap -->
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:            #07090f;
+            --surface:       #0d1117;
+            --surface2:      #111827;
+            --border:        rgba(255,255,255,0.07);
+            --border-focus:  rgba(212,175,55,0.55);
+            --gold:          #d4af37;
+            --gold-dim:      rgba(212,175,55,0.18);
+            --gold-glow:     rgba(212,175,55,0.12);
+            --text:          #f3f4f6;
+            --text-muted:    #6b7280;
+            --text-sub:      #9ca3af;
+            --danger:        #ef4444;
+            --danger-bg:     rgba(239,68,68,0.1);
+            --danger-border: rgba(239,68,68,0.3);
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%,    rgba(212,175,55,0.05) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 50% 100%,  rgba(37,99,235,0.04)  0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Subtle grid overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Layout ── */
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        /* ── Card ── */
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px 40px;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03) inset,
+                0 32px 64px rgba(0,0,0,0.6),
+                0 0 80px rgba(212,175,55,0.04);
+            animation: rise 0.55s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        /* ── Shield icon ── */
+        .icon-wrap {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 28px;
+            border-radius: 22px;
+            background: var(--gold-dim);
+            border: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 0 0 10px rgba(212,175,55,0.05),
+                0 8px 28px rgba(212,175,55,0.14);
+            animation: glow 3.6s ease-in-out infinite;
+        }
+
+        .icon-wrap i {
+            font-size: 2rem;
+            color: var(--gold);
+            filter: drop-shadow(0 0 9px rgba(212,175,55,0.55));
+        }
+
+        @keyframes glow {
+            0%,100% { box-shadow: 0 0 0 10px rgba(212,175,55,0.05), 0 8px 28px rgba(212,175,55,0.14); }
+            50%      { box-shadow: 0 0 0 14px rgba(212,175,55,0.09), 0 8px 36px rgba(212,175,55,0.24); }
+        }
+
+        /* ── Headings ── */
+        .heading {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .heading h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .heading h1 span {
+            background: linear-gradient(135deg, #f5e27a, var(--gold), #b8860b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .heading .sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .divider {
+            width: 36px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        /* ── Error alert ── */
+        .error-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            margin-bottom: 22px;
+            border-radius: 10px;
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            font-size: 0.84rem;
+            color: #fca5a5;
+            animation: rise 0.3s ease both;
+        }
+
+        .error-box i { flex-shrink: 0; font-size: 0.9rem; color: var(--danger); }
+
+        /* ── Success alert (logout) ── */
+        .success-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            margin-bottom: 22px;
+            border-radius: 10px;
+            background: rgba(22,163,74,0.1);
+            border: 1px solid rgba(22,163,74,0.3);
+            font-size: 0.84rem;
+            color: #86efac;
+            animation: rise 0.3s ease both;
+        }
+        .success-box i { flex-shrink: 0; font-size: 0.9rem; color: #22c55e; }
+
+        /* ── Form fields ── */
+        .field { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        label i { margin-right: 5px; color: rgba(212,175,55,0.6); font-size: 0.8rem; }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            color: var(--text);
+            font-size: 0.93rem;
+            font-family: 'Inter', sans-serif;
+            padding: 13px 44px 13px 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-wrap input::placeholder { color: rgba(107,114,128,0.6); }
+
+        .input-wrap input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.08);
+        }
+
+        /* Eye toggle */
+        .eye-btn {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 4px;
+            outline: none;
+            transition: color 0.2s;
+        }
+
+        .eye-btn:hover { color: var(--gold); }
+
+        /* ── Submit button ── */
+        .btn-submit {
+            width: 100%;
+            margin-top: 8px;
+            padding: 14px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #c9a227, var(--gold), #e8c84a);
+            color: #0d0a00;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.28);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(212,175,55,0.42);
+            filter: brightness(1.06);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(212,175,55,0.2);
+        }
+
+        .btn-submit i { margin-right: 8px; }
+
+        /* ── Footer tag ── */
+        .card-foot {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .card-foot p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.35px;
+        }
+
+        .card-foot i { margin-right: 4px; opacity: 0.45; font-size: 0.65rem; }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .card { padding: 36px 22px 28px; border-radius: 16px; }
+            .heading h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <div class="card">
+
+        <!-- Shield icon -->
+        <div class="icon-wrap">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <!-- Headings -->
+        <div class="heading">
+            <h1>SmartAmbulance <span>Admin</span></h1>
+            <div class="divider"></div>
+        </div>
+
+        <!-- Error -->
+        {% if error %}
+        <div class="error-box" role="alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Success (logout) -->
+        {% if success %}
+        <div class="success-box" role="status">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ success }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" action="/admin-login" autocomplete="off">
+
+            <p style="font-size:0.72rem;color:#4b5563;letter-spacing:0.4px;margin-bottom:18px;text-align:center;">System Administrator Access</p>
+
+            <div class="field">
+                <label for="username">
+                    <i class="fas fa-user-shield"></i>Username
+                </label>
+                <div class="input-wrap">
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           placeholder="Enter admin username"
+                           required
+                           autocomplete="off"
+                           autofocus>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password">
+                    <i class="fas fa-lock"></i>Password
+                </label>
+                <div class="input-wrap">
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           placeholder="Enter password"
+                           required
+                           autocomplete="new-password">
+                    <button type="button" class="eye-btn"
+                            onclick="togglePw()"
+                            tabindex="-1"
+                            aria-label="Toggle password visibility">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-sign-in-alt"></i>Sign In
+            </button>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="card-foot">
+            <p><i class="fas fa-lock"></i>Restricted access — authorised personnel only</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function togglePw() {
+        var inp = document.getElementById('password');
+        var ico = document.getElementById('eyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            ico.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            inp.type = 'password';
+            ico.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
+
+</body>
+</html>

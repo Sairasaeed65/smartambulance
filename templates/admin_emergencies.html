@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergencies - SmartAmbulance Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Maps for mini-map -->
+    <script defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_KEY }}&libraries=places&loading=async"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
+        :root{
+            --bg-page:#f0f5ff;
+            --surface-card:#ffffff;
+            --surface-panel:#ffffff;
+            --surface-header:#47627d;
+            --surface-header-alt:#ffffff;
+            --border-soft:#d1d5db;
+            --border-strong:#9ca3af;
+            --shadow-soft:0 2px 8px rgba(15,23,42,.06);
+            --shadow-medium:0 8px 18px rgba(15,23,42,.10);
+            --sidebar-bg1:#0c1a2e;--sidebar-bg2:#0f2040;--sidebar-bg3:#0a1628;
+            --card-border:#c7d7f9;
+            --card-shadow:0 2px 12px rgba(37,99,235,.08);
+            --card-shadow-hover:0 8px 24px rgba(37,99,235,.15);
+            --accent:#2563eb;--accent-dark:#1d4ed8;
+            --accent-pale:#eff6ff;--accent-soft:#dbeafe;--accent-border:#93c5fd;
+            --text-primary:#0c1a2e;--text-secondary:#1e3a5f;
+            --text-muted:#5b7fa6;--text-hint:#93aec8;
+            --success:#15803d;--success-bg:#f0fdf4;--success-border:#86efac;
+            --warning:#b45309;--warning-bg:#fffbeb;--warning-border:#fcd34d;
+            --danger:#dc2626;--danger-bg:#fff1f2;--danger-border:#fca5a5;
+            --divider:#dbeafe;
+        }
+        body{background:var(--bg-page);color:var(--text-primary);min-height:100vh;display:flex}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#f0f5ff}
+        ::-webkit-scrollbar-thumb{background:#93c5fd;border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:#60a5fa}
+
+        /* ===== SIDEBAR ===== */
+        .sidebar{width:240px;background:linear-gradient(170deg,var(--sidebar-bg1) 0%,var(--sidebar-bg2) 50%,var(--sidebar-bg3) 100%);display:flex;flex-direction:column;position:fixed;height:100vh;overflow-y:auto;z-index:100}
+        .sidebar-logo{font-size:.95rem;font-weight:800;padding:20px 18px 18px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:11px;color:white;letter-spacing:-.3px;margin-bottom:8px}
+        .sidebar-logo .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 4px 12px rgba(37,99,235,.4);flex-shrink:0}
+        .sidebar-section-label{font-size:8px;font-weight:800;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:1.2px;padding:0 18px;margin:10px 0 5px}
+        .sidebar-nav{flex:1;padding:4px 0;animation:slideInLeft .5s ease}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:9px;color:rgba(255,255,255,.5);transition:all .2s ease;cursor:pointer;font-weight:600;font-size:.72rem;border:1px solid transparent;text-decoration:none}
+        .nav-item:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.08)}
+        .nav-item.active{color:white;background:linear-gradient(135deg,rgba(37,99,235,.45),rgba(29,78,216,.3));border-color:rgba(147,197,253,.3);box-shadow:0 2px 12px rgba(37,99,235,.2)}
+        .nav-item .nav-icon{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+        .nav-item.active .nav-icon{background:rgba(37,99,235,.35)}
+        .nav-item.nav-danger{color:rgba(252,165,165,.7)}
+        .nav-item.nav-danger:hover{color:#fca5a5;background:rgba(239,68,68,.12)}
+        .nav-item.nav-danger .nav-icon{background:rgba(239,68,68,.1)}
+        .sidebar-divider{height:1px;background:rgba(255,255,255,.07);margin:8px 14px}
+        .sidebar-footer{border-top:1px solid rgba(255,255,255,.07);padding:14px}
+        .admin-info-card{background:rgba(37,99,235,.15);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px;text-align:center}
+        .admin-avatar{width:42px;height:42px;margin:0 auto 8px;border-radius:10px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:white;box-shadow:0 4px 12px rgba(37,99,235,.4)}
+        .admin-name{color:white;font-weight:700;font-size:.65rem}
+        .admin-role{color:rgba(255,255,255,.4);font-size:.65rem;margin-bottom:10px}
+
+        /* ===== MAIN ===== */
+        .main-content{flex:1;margin-left:240px;display:flex;flex-direction:column;min-height:100vh;background:var(--bg-page)}
+        .header{display:flex;justify-content:space-between;align-items:center;padding:11px 22px;background:#0f172a;border-bottom:none;box-shadow:none;position:sticky;top:0;z-index:90}
+        .header-title{display:flex;flex-direction:column}
+        .htitle-row{display:flex;align-items:center;gap:10px}
+        .header-icon{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#3b82f6);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-size:.9rem;box-shadow:0 3px 10px rgba(37,99,235,.35);flex-shrink:0}
+        .htitle-main{font-size:14px;font-weight:700;color:#ffffff}
+        .htitle-section{color:#475569;font-size:12px;font-weight:400;margin-left:4px}
+        .header-controls{display:flex;align-items:center;gap:10px}
+        .live-clock{background:#1e293b;border:none;padding:6px 14px;border-radius:8px;text-align:center}
+        .live-clock-time{color:#ffffff;display:block;font-size:14px;font-weight:700;line-height:1.3}
+        .live-clock-date{color:#64748b;font-size:10px}
+        .hdr-sep{width:1px;height:28px;background:#334155;flex-shrink:0}
+        .avatar-wrap{position:relative;cursor:pointer}
+        .chip-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:.7rem;box-shadow:0 2px 6px rgba(37,99,235,.4);user-select:none}
+        .avatar-popup{display:none;position:absolute;right:0;top:calc(100% + 8px);background:#1e293b;border:1px solid #334155;border-radius:10px;padding:8px;min-width:160px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+        .avatar-wrap.open .avatar-popup{display:block}
+        .av-name{padding:8px 10px 6px;font-size:.72rem;font-weight:700;color:#cbd5e1;display:flex;align-items:center;gap:7px;border-bottom:1px solid #334155;margin-bottom:4px}
+        .av-logout{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;font-size:.72rem;font-weight:700;color:#f87171;text-decoration:none;transition:background .15s}
+        .av-logout:hover{background:rgba(239,68,68,.12)}
+        .htitle-sub{display:flex;align-items:center;gap:5px;color:#4ade80;font-size:10px;margin-top:3px}
+        .htitle-sub-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0;animation:pulse-hdr 1.5s infinite}
+        @keyframes pulse-hdr{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+
+        /* ===== PAGE BODY ===== */
+        .page-body{padding:18px 22px}
+
+        /* ===== STAT CARDS ===== */
+        .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+        .stat-card{background:var(--surface-card);border:1px solid var(--border-soft);padding:14px 13px 11px;border-radius:13px;box-shadow:var(--shadow-soft);transition:transform .2s ease,box-shadow .2s ease;position:relative;overflow:hidden;animation:fadeInUp .5s ease both}
+        .stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.10s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.20s}.stat-card:nth-child(5){animation-delay:.25s}
+        .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3.5px;border-radius:13px 13px 0 0}
+        .stat-card.blue::before{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+        .stat-card.red::before{background:linear-gradient(90deg,#dc2626,#f87171)}
+        .stat-card.green::before{background:linear-gradient(90deg,#15803d,#4ade80)}
+        .stat-card.amber::before{background:linear-gradient(90deg,#d97706,#fbbf24)}
+        .stat-card.purple::before{background:linear-gradient(90deg,#6d28d9,#a78bfa)}
+        .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-medium);border-color:var(--border-strong)}
+        .stat-badge{font-size:8px;font-weight:700;padding:3px 7px;border-radius:6px;position:absolute;top:12px;right:12px;border:1px solid}
+        .stat-card.blue  .stat-badge{background:#eff6ff;color:#2563eb;border-color:#93c5fd}
+        .stat-card.red   .stat-badge{background:#fff1f2;color:#dc2626;border-color:#fca5a5}
+        .stat-card.green .stat-badge{background:#f0fdf4;color:#15803d;border-color:#86efac}
+        .stat-card.amber .stat-badge{background:#fffbeb;color:#b45309;border-color:#fcd34d}
+        .stat-card.purple .stat-badge{background:#faf5ff;color:#6d28d9;border-color:#c4b5fd}
+        .stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;margin-bottom:8px;border:1px solid}
+        .stat-card.blue  .stat-icon{background:#eff6ff;border-color:#93c5fd;color:#2563eb}
+        .stat-card.red   .stat-icon{background:#fff1f2;border-color:#fca5a5;color:#dc2626}
+        .stat-card.green .stat-icon{background:#f0fdf4;border-color:#86efac;color:#16a34a}
+        .stat-card.amber .stat-icon{background:#fffbeb;border-color:#fcd34d;color:#d97706}
+        .stat-card.purple .stat-icon{background:#faf5ff;border-color:#c4b5fd;color:#7c3aed}
+        .stat-label{font-size:.6rem;margin-bottom:3px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+        .stat-card.blue  .stat-label{color:#3b82f6}.stat-card.red .stat-label{color:#ef4444}
+        .stat-card.green .stat-label{color:#16a34a}.stat-card.amber .stat-label{color:#d97706}
+        .stat-card.purple .stat-label{color:#7c3aed}
+        .stat-value{font-size:1.55rem;font-weight:800;line-height:1;margin-bottom:3px}
+        .stat-card.blue  .stat-value{color:#1d4ed8}.stat-card.red .stat-value{color:#dc2626}
+        .stat-card.green .stat-value{color:#15803d}.stat-card.amber .stat-value{color:#b45309}
+        .stat-card.purple .stat-value{color:#5b21b6}
+        .stat-sub{font-size:.6rem;color:var(--text-hint)}
+
+        /* ===== REFRESH BAR ===== */
+        .refresh-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+        .refresh-info{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--text-muted)}
+        .pulse-dot{width:8px;height:8px;border-radius:50%;background:#dc2626;animation:pulse-red 1.5s infinite}
+        @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}50%{box-shadow:0 0 0 5px rgba(220,38,38,0)}}
+        .btn-refresh{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--accent-pale);border:1px solid var(--accent-border);color:var(--accent-dark);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s ease}
+        .btn-refresh:hover{background:#dbeafe}
+        .btn-refresh:disabled{opacity:.5;cursor:not-allowed}
+
+        /* ===== TABS ===== */
+        .tabs-bar{display:flex;gap:0;margin-bottom:16px;background:var(--surface-header);border:1px solid var(--border-soft);border-radius:11px;padding:4px;box-shadow:var(--shadow-soft)}
+        .tab-btn{flex:1;padding:9px 16px;border-radius:8px;font-size:.74rem;font-weight:700;border:none;cursor:pointer;transition:all .2s ease;color:rgba(255,255,255,.82);background:transparent;display:flex;align-items:center;justify-content:center;gap:8px}
+        .tab-btn.active{background:rgba(255,255,255,.16);color:white;box-shadow:none}
+        .tab-btn .tab-count{padding:2px 8px;border-radius:20px;font-size:.62rem;font-weight:800}
+        .tab-btn.active .tab-count{background:rgba(255,255,255,.22);color:white}
+        .tab-btn:not(.active) .tab-count{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+        .tab-panel{display:none}.tab-panel.active{display:block}
+
+        /* ===== TABLE CARD ===== */
+        .table-card{background:var(--surface-card);border:1px solid var(--border-soft);border-radius:13px;box-shadow:var(--shadow-soft);overflow:hidden;animation:fadeInUp .5s ease .2s both}
+        .table-card-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border-soft);background:var(--surface-header)}
+        .table-card-title{display:flex;align-items:center;gap:9px;font-size:.78rem;font-weight:800;color:#f8fbff;text-transform:uppercase;letter-spacing:.5px}
+        .tc-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:white;font-size:.65rem;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+        .tc-icon.red{background:linear-gradient(135deg,#dc2626,#ef4444)}
+        .tc-icon.blue{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+        .table-count-badge{font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.14);color:#ffffff;border:1px solid rgba(255,255,255,.24)}
+        .emerg-table{width:100%;border-collapse:collapse;background:var(--surface-panel)}
+        .emerg-table thead th{padding:9px 13px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#1f2937;background:var(--surface-header-alt);border-bottom:1px solid var(--border-soft);white-space:nowrap;text-align:left}
+        .emerg-table tbody tr{border-bottom:1px solid var(--border-soft);transition:background .15s ease;cursor:pointer}
+        .emerg-table tbody tr:last-child{border-bottom:none}
+        .emerg-table tbody tr:hover{background:#eef4fb}
+        .emerg-table tbody tr:nth-child(even){background:#f8fafc}
+        .emerg-table tbody tr:nth-child(even):hover{background:#eef4fb}
+        .emerg-table tbody td{padding:10px 13px;font-size:.73rem;color:var(--text-primary);vertical-align:middle}
+        .req-id{font-weight:800;font-size:.7rem;color:var(--accent-dark);font-family:monospace}
+        .patient-name{font-weight:700;font-size:.76rem}
+        .patient-phone{font-size:.62rem;color:var(--text-hint);margin-top:1px}
+        .location-cell{max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.7rem;color:var(--text-muted)}
+        .priority-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:.58rem;font-weight:800;text-transform:uppercase;border:1px solid}
+        .pri-high{background:#fff1f2;color:#dc2626;border-color:#fca5a5}
+        .pri-medium{background:#fffbeb;color:#b45309;border-color:#fcd34d}
+        .pri-low{background:#f0fdf4;color:#15803d;border-color:#86efac}
+        .pri-unknown{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+
+        /* STATUS BADGES */
+        .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;font-size:.63rem;font-weight:700;border:1px solid;white-space:nowrap}
+        .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+        .s-pending .status-dot{background:#dc2626;animation:pulse-red 1.2s infinite}
+        .s-accepted .status-dot,.s-assigned .status-dot,.s-en_route .status-dot,.s-picked_up .status-dot{background:#d97706;animation:pulse-amber 1.5s infinite}
+        @keyframes pulse-amber{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,.5)}50%{box-shadow:0 0 0 4px rgba(217,119,6,0)}}
+        .s-completed .status-dot{background:#16a34a}
+        .s-no_hospital_available .status-dot{background:#94a3b8}
+        .s-cancelled .status-dot{background:#94a3b8}
+        .s-pending{background:#fff1f2;color:#dc2626;border-color:#fca5a5}
+        .s-accepted,.s-assigned,.s-en_route,.s-picked_up{background:#fffbeb;color:#b45309;border-color:#fcd34d}
+        .s-completed{background:#f0fdf4;color:#15803d;border-color:#86efac}
+        .s-no_hospital_available,.s-cancelled{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+        .s-forwarded{background:#faf5ff;color:#6d28d9;border-color:#c4b5fd}
+
+        .time-cell{font-size:.68rem;color:var(--text-muted)}
+        .resp-time{font-size:.7rem;font-weight:700;color:var(--text-primary)}
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;color:var(--text-hint)}
+        .empty-state i{font-size:2.2rem;margin-bottom:10px;color:#c7d7f9}
+        .empty-state p{font-size:.78rem;font-weight:600}
+
+        /* ===== MODAL ===== */
+        .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(7,9,25,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s ease}
+        .modal-overlay.open{opacity:1;pointer-events:all}
+        .modal{background:white;border-radius:18px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(7,9,25,.25);transform:translateY(20px);transition:transform .25s ease;border:1px solid var(--card-border)}
+        .modal-overlay.open .modal{transform:translateY(0)}
+        .modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 22px 14px;border-bottom:1.5px solid var(--divider);background:var(--accent-pale);border-radius:18px 18px 0 0}
+        .modal-req-id{font-size:.65rem;font-weight:800;color:var(--text-muted);font-family:monospace;margin-bottom:4px}
+        .modal-patient-name{font-size:1.05rem;font-weight:800;color:var(--text-primary)}
+        .modal-sub{font-size:.72rem;color:var(--text-muted);margin-top:3px}
+        .modal-close{width:32px;height:32px;border-radius:8px;background:white;border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;color:var(--text-muted);transition:all .2s ease;flex-shrink:0}
+        .modal-close:hover{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger)}
+        .modal-body{padding:20px 22px}
+        .modal-section{margin-bottom:20px}
+        .modal-section-title{font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:7px}
+        .modal-section-title i{color:var(--accent)}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+        .info-row{background:#f8faff;border:1px solid var(--card-border);border-radius:9px;padding:10px 12px}
+        .ir-label{font-size:.58rem;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+        .ir-value{font-size:.76rem;font-weight:600;color:var(--text-primary)}
+        .ir-value.empty{color:var(--text-hint);font-weight:400;font-style:italic}
+        #miniMap{width:100%;height:220px;border-radius:11px;border:1px solid var(--card-border);overflow:hidden}
+        .map-placeholder{width:100%;height:220px;border-radius:11px;border:1px solid var(--card-border);background:#f8faff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text-hint)}
+        .map-placeholder i{font-size:1.8rem;color:#c7d7f9}
+        .map-placeholder p{font-size:.72rem}
+        .timeline-list{display:flex;flex-direction:column;gap:0}
+        .tl-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px dashed #e8ecf8}
+        .tl-item:last-child{border-bottom:none}
+        .tl-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:3px}
+        .tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0}
+        .tl-line{width:2px;flex:1;background:#e8ecf8;margin-top:4px;min-height:20px}
+        .tl-item:last-child .tl-line{display:none}
+        .tl-content{flex:1}
+        .tl-status-change{font-size:.72rem;font-weight:700;color:var(--text-primary)}
+        .tl-meta{font-size:.63rem;color:var(--text-hint);margin-top:2px}
+        .no-timeline{font-size:.75rem;color:var(--text-hint);font-style:italic;text-align:center;padding:14px}
+        .modal-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:12px;color:var(--text-muted);font-size:.78rem}
+        .spinner{width:32px;height:32px;border:3px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* ===== TOAST ===== */
+        .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+        .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:11px;font-size:.78rem;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.14);border:1px solid;animation:slideInToast .3s ease;max-width:320px}
+        .toast.success{background:#f0fdf4;color:#15803d;border-color:#86efac}
+        .toast.error{background:#fff1f2;color:#dc2626;border-color:#fca5a5}
+        @keyframes slideInToast{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+        /* ===== SUSPICIOUS BADGE ===== */
+        .sus-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:.58rem;font-weight:800;background:#fff7ed;color:#c2410c;border:1px solid #fb923c;cursor:default;white-space:nowrap}
+        .sus-badge i{font-size:.6rem}
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+        @media(max-width:1300px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+        @media(max-width:768px){.sidebar{display:none}.main-content{margin-left:0}.stats-grid{grid-template-columns:1fr 1fr}}
+    </style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+        <div>
+            <div>SmartAmbulance</div>
+            <div style="font-size:.6rem;font-weight:500;color:rgba(255,255,255,.35);margin-top:1px;">Admin Control Panel</div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="/admin-dashboard" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>Dashboard
+        </a>
+        <a href="/admin-hospitals" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-hospital"></i></div>Hospitals
+        </a>
+        <a href="/admin-drivers" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-id-card"></i></div>Drivers
+        </a>
+        <a href="/admin-emergencies" class="nav-item active">
+            <div class="nav-icon"><i class="fas fa-ambulance"></i></div>Emergencies
+        </a>
+        <a href="/admin-users" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-users"></i></div>Users
+        </a>
+        <a href="/admin-reports" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>Reports
+        </a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">Account</div>
+        <a href="/admin-settings" class="nav-item">
+            <div class="nav-icon"><i class="fas fa-cog"></i></div>Settings
+        </a>
+        <a href="/admin-logout" class="nav-item nav-danger">
+            <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>Logout
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="admin-info-card">
+            <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+            <div class="admin-name">{{ admin_username }}</div>
+            <div class="admin-role">System Administrator</div>
+        </div>
+    </div>
+</aside>
+
+<!-- ========== MAIN CONTENT ========== -->
+<div class="main-content">
+
+    <div class="header">
+        <div class="header-title">
+            <div class="htitle-row">
+                <div class="header-icon"><i class="fas fa-ambulance"></i></div>
+                <div>
+                    <div class="htitle-main">Emergencies <span class="htitle-section">/ Monitor</span></div>
+                    <div class="htitle-sub"><span class="htitle-sub-dot"></span> All systems live</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <div class="live-clock">
+                <span class="live-clock-time" id="liveClock">--:--:--</span>
+                <span class="live-clock-date" id="liveDate">Loading...</span>
+            </div>
+            <div class="hdr-sep"></div>
+            <div class="avatar-wrap" id="avatarWrap">
+                <div class="chip-avatar" onclick="document.getElementById('avatarWrap').classList.toggle('open')">{{ admin_username[0]|upper if admin_username else 'A' }}</div>
+                <div class="avatar-popup">
+                    <div class="av-name"><i class="fas fa-user-shield"></i> {{ admin_username }}</div>
+                    <a href="/admin-logout" class="av-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Page heading -->
+        <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:1.15rem;font-weight:800;color:var(--text-primary);">Emergency Monitor</div>
+                <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">
+                    Real-time tracking of all emergency requests. Auto-refreshes every 15 seconds.
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <span class="stat-badge">TODAY</span>
+                <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                <div class="stat-label">Total Today</div>
+                <div class="stat-value" id="statTotalToday">{{ stats.total_today }}</div>
+                <div class="stat-sub">All requests today</div>
+            </div>
+            <div class="stat-card red">
+                <span class="stat-badge">LIVE</span>
+                <div class="stat-icon"><i class="fas fa-circle-dot"></i></div>
+                <div class="stat-label">Active Now</div>
+                <div class="stat-value" id="statActive">{{ stats.active }}</div>
+                <div class="stat-sub">Requires attention</div>
+            </div>
+            <div class="stat-card green">
+                <span class="stat-badge">ALL TIME</span>
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-label">Completed</div>
+                <div class="stat-value">{{ stats.completed }}</div>
+                <div class="stat-sub">Successfully resolved</div>
+            </div>
+            <div class="stat-card amber">
+                <span class="stat-badge">ALL TIME</span>
+                <div class="stat-icon"><i class="fas fa-share-nodes"></i></div>
+                <div class="stat-label">Forwarded</div>
+                <div class="stat-value">{{ stats.forwarded }}</div>
+                <div class="stat-sub">Auto-routed cases</div>
+            </div>
+            <div class="stat-card purple">
+                <span class="stat-badge">30 DAYS</span>
+                <div class="stat-icon"><i class="fas fa-stopwatch"></i></div>
+                <div class="stat-label">Avg Response</div>
+                <div class="stat-value">{{ stats.avg_response }}<span style="font-size:.85rem"> min</span></div>
+                <div class="stat-sub">Time to completion</div>
+            </div>
+        </div>
+
+        <!-- Refresh bar -->
+        <div class="refresh-bar">
+            <div class="refresh-info">
+                <div class="pulse-dot"></div>
+                <span id="refreshLabel">Live — auto-refreshes every 15s</span>
+            </div>
+            <button class="btn-refresh" id="btnRefresh" onclick="doRefresh()">
+                <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh Now
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" id="tab-live-btn" onclick="switchTab('live')">
+                <i class="fas fa-circle-dot" style="color:#dc2626"></i>
+                Live Emergencies
+                <span class="tab-count" id="tabLiveCount">{{ active_rows|length }}</span>
+            </button>
+            <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">
+                <i class="fas fa-clock-rotate-left"></i>
+                History
+                <span class="tab-count" id="tabHistoryCount">{{ history_rows|length }}</span>
+            </button>
+        </div>
+
+        <!-- Tab: Live -->
+        <div class="tab-panel active" id="tab-live">
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div class="table-card-title">
+                        <div class="tc-icon red"><i class="fas fa-circle-dot"></i></div>
+                        Active Emergencies
+                    </div>
+                    <span class="table-count-badge" id="liveTableCount">{{ active_rows|length }} active</span>
+                </div>
+                {% if active_rows %}
+                <table class="emerg-table">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Patient</th>
+                            <th>Location</th>
+                            <th>Hospital</th>
+                            <th>Driver</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liveTableBody">
+                    {% for r in active_rows %}
+                    <tr onclick="viewEmergency('{{ r.request_id }}')" title="Click to view details">
+                        <td><span class="req-id">{{ r.request_id }}</span></td>
+                        <td>
+                            <div class="patient-name">{{ r.patient_name or '—' }}</div>
+                            <div class="patient-phone">{{ r.patient_phone or '' }}</div>
+                            {% if r.is_suspicious %}
+                            <div style="margin-top:4px;"><span class="sus-badge" title="{{ r.suspicious_reasons }}"><i class="fas fa-triangle-exclamation"></i> Suspicious</span></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="location-cell" title="{{ r.pickup_address or '' }}">
+                                {% if r.pickup_address %}
+                                <i class="fas fa-map-marker-alt" style="color:#f87171;font-size:.6rem;margin-right:3px;"></i>{{ r.pickup_address }}
+                                {% else %}<span style="color:var(--text-hint)">—</span>{% endif %}
+                            </div>
+                        </td>
+                        <td style="font-size:.7rem;color:var(--text-muted);">
+                            {% if r.hospital_name %}<i class="fas fa-hospital" style="font-size:.58rem;color:#60a5fa;margin-right:3px;"></i>{{ r.hospital_name }}
+                            {% else %}<span style="color:var(--text-hint)">—</span>{% endif %}
+                        </td>
+                        <td style="font-size:.7rem;color:var(--text-muted);">
+                            {% if r.driver_name %}<i class="fas fa-user" style="font-size:.58rem;margin-right:3px;"></i>{{ r.driver_name }}
+                            {% else %}<span style="color:var(--text-hint)">Unassigned</span>{% endif %}
+                        </td>
+                        <td>
+                            {% set p = (r.priority or 'unknown')|lower %}
+                            <span class="priority-badge {% if p == 'high' %}pri-high{% elif p == 'medium' %}pri-medium{% elif p == 'low' %}pri-low{% else %}pri-unknown{% endif %}">
+                                {{ r.priority or '—' }}
+                            </span>
+                        </td>
+                        <td>{{ statusBadge(r.status, r.auto_processed, r.forwarded_from_hospital_id) }}</td>
+                        <td class="time-cell">{{ r.created_at or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state" style="padding:56px 20px;">
+                    <i class="fas fa-check-circle" style="color:#4ade80;font-size:2.5rem;margin-bottom:12px;"></i>
+                    <p style="color:var(--text-primary);font-weight:700;font-size:.85rem;">No active emergencies right now</p>
+                    <p style="font-size:.74rem;color:var(--text-muted);margin-top:6px;">System is monitoring — requests will appear here automatically</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: History -->
+        <div class="tab-panel" id="tab-history">
+            <div class="table-card">
+                <div class="table-card-header">
+                    <div class="table-card-title">
+                        <div class="tc-icon blue"><i class="fas fa-clock-rotate-left"></i></div>
+                        Emergency History
+                    </div>
+                    <span class="table-count-badge">{{ history_rows|length }} records</span>
+                </div>
+                {% if history_rows %}
+                <table class="emerg-table">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Patient</th>
+                            <th>Location</th>
+                            <th>Hospital</th>
+                            <th>Driver</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in history_rows %}
+                    <tr onclick="viewEmergency('{{ r.request_id }}')" title="Click to view details">
+                        <td><span class="req-id">{{ r.request_id }}</span></td>
+                        <td>
+                            <div class="patient-name">{{ r.patient_name or '—' }}</div>
+                            <div class="patient-phone">{{ r.patient_phone or '' }}</div>
+                            {% if r.is_suspicious %}
+                            <div style="margin-top:4px;"><span class="sus-badge" title="{{ r.suspicious_reasons }}"><i class="fas fa-triangle-exclamation"></i> Suspicious</span></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="location-cell" title="{{ r.pickup_address or '' }}">
+                                {% if r.pickup_address %}
+                                <i class="fas fa-map-marker-alt" style="color:#f87171;font-size:.6rem;margin-right:3px;"></i>{{ r.pickup_address }}
+                                {% else %}<span style="color:var(--text-hint)">—</span>{% endif %}
+                            </div>
+                        </td>
+                        <td style="font-size:.7rem;color:var(--text-muted);">
+                            {% if r.hospital_name %}<i class="fas fa-hospital" style="font-size:.58rem;color:#60a5fa;margin-right:3px;"></i>{{ r.hospital_name }}
+                            {% else %}<span style="color:var(--text-hint)">—</span>{% endif %}
+                        </td>
+                        <td style="font-size:.7rem;color:var(--text-muted);">
+                            {% if r.driver_name %}<i class="fas fa-user" style="font-size:.58rem;margin-right:3px;"></i>{{ r.driver_name }}
+                            {% else %}<span style="color:var(--text-hint)">—</span>{% endif %}
+                        </td>
+                        <td>
+                            {% set p = (r.priority or 'unknown')|lower %}
+                            <span class="priority-badge {% if p == 'high' %}pri-high{% elif p == 'medium' %}pri-medium{% elif p == 'low' %}pri-low{% else %}pri-unknown{% endif %}">
+                                {{ r.priority or '—' }}
+                            </span>
+                        </td>
+                        <td>{{ statusBadge(r.status, r.auto_processed, r.forwarded_from_hospital_id) }}</td>
+                        <td class="time-cell">{{ r.created_at or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state" style="padding:56px 20px;">
+                    <i class="fas fa-clock-rotate-left" style="font-size:2.2rem;margin-bottom:12px;"></i>
+                    <p style="font-size:.85rem;font-weight:700;">No emergency history yet</p>
+                    <p style="font-size:.74rem;color:var(--text-muted);margin-top:6px;">Completed and cancelled requests will appear here</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<!-- ========== DETAIL MODAL ========== -->
+<div class="modal-overlay" id="emergencyModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal" id="modalBox">
+        <div class="modal-header" id="modalHeader">
+            <div>
+                <div class="modal-req-id" id="modalReqId">Loading...</div>
+                <div class="modal-patient-name" id="modalPatientName">—</div>
+                <div class="modal-sub" id="modalSub"></div>
+            </div>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="modal-loading">
+                <div class="spinner"></div>
+                <span>Loading emergency details...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+{% macro statusBadge(status, auto_processed, forwarded_from) %}
+    {% set s = (status or 'unknown')|lower %}
+    {% if auto_processed or forwarded_from %}
+        <span class="status-badge s-forwarded"><span class="status-dot" style="background:#7c3aed"></span>Forwarded</span>
+    {% elif s == 'pending' %}
+        <span class="status-badge s-pending"><span class="status-dot"></span>Pending</span>
+    {% elif s in ('accepted','assigned','en_route','picked_up') %}
+        <span class="status-badge s-accepted"><span class="status-dot"></span>{{ status }}</span>
+    {% elif s == 'completed' %}
+        <span class="status-badge s-completed"><span class="status-dot"></span>Completed</span>
+    {% elif s == 'no_hospital_available' %}
+        <span class="status-badge s-no_hospital_available"><span class="status-dot"></span>No Hospital</span>
+    {% else %}
+        <span class="status-badge s-cancelled"><span class="status-dot"></span>{{ status or 'Unknown' }}</span>
+    {% endif %}
+{% endmacro %}
+
+<script>
+// ===== Clock =====
+function updateClock() {
+    var now = new Date();
+    document.getElementById('liveClock').textContent =
+        now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('liveDate').textContent =
+        now.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric'});
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('avatarWrap');
+    if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+// ===== All-Stats Live Sync (every 30s) =====
+function syncAllStats() {
+    fetch('/admin-api/all-stats')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        var tt = document.getElementById('statTotalToday');
+        if (tt && d.emergencies_today !== undefined) tt.textContent = d.emergencies_today;
+        var ac = document.getElementById('statActive');
+        if (ac && d.active_emergencies !== undefined) ac.textContent = d.active_emergencies;
+    })
+    .catch(function() {});
+}
+syncAllStats();
+setInterval(syncAllStats, 30000);
+
+// ===== Toast =====
+function showToast(msg, type) {
+    var c = document.getElementById('toastContainer');
+    var t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' + msg;
+    c.appendChild(t);
+    setTimeout(function() { t.remove(); }, 3500);
+}
+
+// ===== SSE Real-Time Alerts (Hospital Dashboard) =====
+var _sseEventSource = null;
+var _sseConnected = false;
+
+function initializeSSE() {
+    // Try to establish SSE connection for real-time alerts
+    try {
+        _sseEventSource = new EventSource('/hospital-sse-stream');
+        
+        _sseEventSource.addEventListener('open', function() {
+            console.log('[SSE] Connected to real-time alert stream');
+            _sseConnected = true;
+        });
+        
+        _sseEventSource.addEventListener('new_emergency', function(event) {
+            console.log('[SSE] New emergency alert received');
+            try {
+                var data = JSON.parse(event.data);
+                showToast('🚨 ' + (data.message || 'New emergency request!'), 'error');
+                // Trigger immediate refresh instead of waiting 15 seconds
+                doRefresh();
+            } catch(e) {
+                console.error('[SSE] Error parsing emergency data:', e);
+            }
+        });
+        
+        _sseEventSource.addEventListener('error', function(event) {
+            if (_sseEventSource.readyState === EventSource.CLOSED) {
+                console.log('[SSE] Connection closed');
+                _sseConnected = false;
+                // Try to reconnect after 5 seconds
+                setTimeout(initializeSSE, 5000);
+            } else {
+                console.warn('[SSE] Connection error');
+            }
+        });
+        
+    } catch(e) {
+        console.log('[SSE] EventSource not supported or connection failed, using polling fallback');
+        _sseConnected = false;
+    }
+}
+
+// Initialize SSE on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSSE();
+});
+
+// Cleanup SSE on page unload
+window.addEventListener('beforeunload', function() {
+    if (_sseEventSource) {
+        _sseEventSource.close();
+    }
+});
+
+// ===== Tabs =====
+function switchTab(name) {
+    document.getElementById('tab-live').classList.toggle('active', name === 'live');
+    document.getElementById('tab-history').classList.toggle('active', name === 'history');
+    document.getElementById('tab-live-btn').classList.toggle('active', name === 'live');
+    document.getElementById('tab-history-btn').classList.toggle('active', name === 'history');
+}
+
+// ===== Status badge helper (JS) =====
+function buildStatusBadge(status, auto_processed, forwarded_from) {
+    function wrap(cls, dotStyle, label) {
+        return '<span class="status-badge ' + cls + '"><span class="status-dot" style="' + dotStyle + '"></span>' + label + '</span>';
+    }
+    if (auto_processed || forwarded_from) return wrap('s-forwarded', 'background:#7c3aed', 'Forwarded');
+    var s = (status || '').toLowerCase();
+    if (s === 'pending')    return wrap('s-pending', '', 'Pending');
+    if (s === 'accepted' || s === 'assigned' || s === 'en_route' || s === 'picked_up')
+        return wrap('s-accepted', '', status);
+    if (s === 'completed')  return wrap('s-completed', 'background:#16a34a', 'Completed');
+    if (s === 'no_hospital_available') return wrap('s-no_hospital_available', 'background:#94a3b8', 'No Hospital');
+    return wrap('s-cancelled', 'background:#94a3b8', status || 'Unknown');
+}
+
+// ===== Auto-refresh every 15s =====
+var refreshSecs = 15, refreshTimer;
+var _prevActiveCount = {{ active_rows|length }};
+
+function scheduleRefresh() {
+    clearInterval(refreshTimer);
+    refreshSecs = 15;
+    refreshTimer = setInterval(function() {
+        refreshSecs--;
+        document.getElementById('refreshLabel').textContent =
+            'Live — auto-refreshes in ' + refreshSecs + 's';
+        if (refreshSecs <= 0) doRefresh();
+    }, 1000);
+}
+
+function doRefresh() {
+    var btn = document.getElementById('btnRefresh');
+    var icon = document.getElementById('refreshIcon');
+    btn.disabled = true;
+    icon.classList.add('fa-spin');
+    document.getElementById('refreshLabel').textContent = 'Refreshing...';
+
+    fetch('/admin-api/emergency-stats')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (!Array.isArray(data.active)) return;
+        var newCount = data.active_count != null ? data.active_count : data.active.length;
+
+        // Show red toast if new emergencies have arrived
+        if (newCount > _prevActiveCount) {
+            showToast('🚨 New emergency request received!', 'error');
+        }
+        _prevActiveCount = newCount;
+
+        var tbody = document.getElementById('liveTableBody');
+        if (tbody) {
+            var html = '';
+            data.active.forEach(function(r) {
+                html += '<tr onclick="viewEmergency(\'' + r.request_id + '\')" title="Click to view details">'
+                    + '<td><span class="req-id">' + r.request_id + '</span></td>'
+                    + '<td><div class="patient-name">' + (r.patient_name || '—') + '</div>'
+                    + (r.is_suspicious ? '<div style="margin-top:4px;"><span class="sus-badge" title="' + (r.suspicious_reasons || '') + '"><i class="fas fa-triangle-exclamation"></i> Suspicious</span></div>' : '')
+                    + '</td>'
+                    + '<td><div class="location-cell" title="' + (r.pickup_address || '') + '">'
+                    + (r.pickup_address ? '<i class="fas fa-map-marker-alt" style="color:#f87171;font-size:.6rem;margin-right:3px;"></i>' + r.pickup_address : '<span style="color:var(--text-hint)">—</span>')
+                    + '</div></td>'
+                    + '<td style="font-size:.7rem;color:var(--text-muted);">' + (r.hospital_name || '<span style="color:var(--text-hint)">—</span>') + '</td>'
+                    + '<td style="font-size:.7rem;color:var(--text-muted);">' + (r.driver_name || '<span style="color:var(--text-hint)">Unassigned</span>') + '</td>'
+                    + '<td></td>'
+                    + '<td>' + buildStatusBadge(r.status, r.auto_processed, r.forwarded_from_hospital_id) + '</td>'
+                    + '<td class="time-cell">' + (r.created_at || '—') + '</td>'
+                    + '</tr>';
+            });
+            if (html) {
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8">'
+                    + '<div class="empty-state">'
+                    + '<i class="fas fa-check-circle" style="color:#4ade80;font-size:2.5rem;"></i>'
+                    + '<p style="color:var(--text-primary);font-weight:700;">No active emergencies right now</p>'
+                    + '<p style="font-size:.74rem;color:var(--text-muted);">System is monitoring — requests will appear here automatically</p>'
+                    + '</div></td></tr>';
+            }
+        }
+        document.getElementById('statActive').textContent = newCount;
+        document.getElementById('tabLiveCount').textContent = newCount;
+        document.getElementById('liveTableCount').textContent = newCount + ' active';
+        if (data.total_today != null) {
+            var totalEl = document.querySelector('.stat-card.blue .stat-value');
+            if (totalEl) totalEl.textContent = data.total_today;
+        }
+    })
+    .catch(function() {
+        showToast('Refresh failed. Will retry shortly.', 'error');
+    })
+    .finally(function() {
+        btn.disabled = false;
+        icon.classList.remove('fa-spin');
+        scheduleRefresh();
+    });
+}
+scheduleRefresh();
+
+// ===== Detail Modal =====
+var _googleMap = null;
+var _googleMarker = null;
+var _googleInfoWindow = null;
+
+function viewEmergency(reqId) {
+    var overlay = document.getElementById('emergencyModal');
+    document.getElementById('modalReqId').textContent = reqId;
+    document.getElementById('modalPatientName').textContent = 'Loading...';
+    document.getElementById('modalSub').textContent = '';
+    document.getElementById('modalBody').innerHTML =
+        '<div class="modal-loading"><div class="spinner"></div><span>Loading...</span></div>';
+    overlay.classList.add('open');
+
+    fetch('/admin-emergency-details/' + encodeURIComponent(reqId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status !== 'success') {
+            document.getElementById('modalBody').innerHTML =
+                '<div class="modal-loading"><i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:1.5rem;"></i><span style="color:#dc2626;">Failed to load details.</span></div>';
+            return;
+        }
+        var req = data.request;
+        var tl = data.timeline;
+
+        document.getElementById('modalReqId').textContent = req.request_id;
+        document.getElementById('modalPatientName').textContent = req.patient_name || 'Unknown Patient';
+        document.getElementById('modalSub').textContent =
+            (req.hospital_name || '') + (req.driver_name ? '  ·  Driver: ' + req.driver_name : '');
+
+        // Build timeline HTML
+        var tlHtml = '';
+        if (tl && tl.length > 0) {
+            tl.forEach(function(t) {
+                var dotColor = '#93c5fd';
+                var ns = (t.new_status || '').toLowerCase();
+                if (ns === 'completed') dotColor = '#4ade80';
+                else if (ns === 'pending') dotColor = '#f87171';
+                else if (ns === 'accepted' || ns === 'assigned' || ns === 'en_route') dotColor = '#fbbf24';
+                tlHtml += '<div class="tl-item">'
+                    + '<div class="tl-dot-wrap">'
+                    + '<div class="tl-dot" style="background:' + dotColor + ';border-color:' + dotColor + '"></div>'
+                    + '<div class="tl-line"></div>'
+                    + '</div>'
+                    + '<div class="tl-content">'
+                    + '<div class="tl-status-change">'
+                    + (t.old_status ? '<span style="color:var(--text-hint)">' + t.old_status + '</span> → ' : '')
+                    + '<strong>' + (t.new_status || '?') + '</strong>'
+                    + '</div>'
+                    + '<div class="tl-meta">'
+                    + (t.action_by ? 'By: ' + t.action_by + '  ' : '')
+                    + (t.driver_name ? 'Driver: ' + t.driver_name + '  ' : '')
+                    + (t.timestamp ? t.timestamp : '')
+                    + (t.notes ? '<br><em style="color:var(--text-muted)">' + t.notes + '</em>' : '')
+                    + '</div>'
+                    + '</div></div>';
+            });
+        } else {
+            tlHtml = '<div class="no-timeline">No timeline events recorded.</div>';
+        }
+
+        // Map HTML (placeholder rendered first, map initialized after)
+        var hasGPS = req.latitude && req.longitude;
+        var mapHtml = hasGPS
+            ? '<div id="miniMap"></div>'
+            : '<div class="map-placeholder"><i class="fas fa-map-marker-alt"></i><p>No GPS coordinates available</p></div>';
+
+        var infoGrid = infoRow('Patient Name', req.patient_name || '—')
+            + infoRow('Phone', req.patient_phone || '—')
+            + infoRow('Age', req.age ? req.age + ' yrs' : '—')
+            + infoRow('Priority', req.priority || '—')
+            + infoRow('Reason', req.reason || '—')
+            + infoRow('Symptoms', req.symptoms || '—', 'full');
+
+        var assignGrid = infoRow('Hospital', req.hospital_name || '—')
+            + infoRow('Driver', req.driver_name || 'Unassigned')
+            + infoRow('Status', req.status || '—')
+            + infoRow('Forwarded From', req.forwarded_from_name || '—')
+            + infoRow('Reassigned', req.reassignment_count > 0 ? req.reassignment_count + ' times' : 'No')
+            + infoRow('Requested At', req.created_at || '—');
+
+        // Suspicious warning
+        var suspWarn = '';
+        if (req.is_suspicious) {
+            suspWarn = '<div class="modal-section" style="padding-bottom:0;">'
+                + '<div style="background:#fff7ed;border:1px solid #fb923c;border-radius:9px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;">'
+                + '<i class="fas fa-triangle-exclamation" style="color:#ea580c;margin-top:1px;flex-shrink:0;"></i>'
+                + '<div><div style="font-size:.72rem;font-weight:800;color:#c2410c;margin-bottom:2px;">Suspicious Activity Detected</div>'
+                + '<div style="font-size:.65rem;color:#9a3412;">' + (req.suspicious_reasons || '') + '</div></div>'
+                + '</div></div>';
+        }
+
+        // Blacklist button
+        var blBtn = '';
+        var ph = (req.patient_phone || '').trim();
+        if (ph && ph !== 'Not Provided' && ph !== 'N/A') {
+            if (req.is_blacklisted) {
+                blBtn = '<div style="padding:0 0 14px;display:flex;align-items:center;gap:8px;">'
+                    + '<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:.72rem;font-weight:700;color:#15803d;"><i class="fas fa-ban"></i> This number is blacklisted</span>'
+                    + '<button onclick="unblacklistPhone(\'' + ph + '\')" style="padding:6px 12px;background:#fff;border:1px solid #d1d5db;border-radius:8px;font-size:.7rem;font-weight:700;color:#6b7280;cursor:pointer;">Remove Ban</button>'
+                    + '</div>';
+            } else {
+                blBtn = '<div style="padding:0 0 14px;text-align:right;">'
+                    + '<button onclick="blacklistPhone(\'' + ph.replace(/'/g, "\''") + '\', \'' + (req.patient_name || 'Unknown').replace(/'/g, "\'") + '\')" '
+                    + 'style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#fff1f2;border:1px solid #fca5a5;border-radius:8px;font-size:.72rem;font-weight:700;color:#dc2626;cursor:pointer;" '
+                    + 'onmouseover="this.style.background=\'#ffe4e6\'" onmouseout="this.style.background=\'#fff1f2\'">'
+                    + '<i class="fas fa-ban"></i> Blacklist Phone Number'
+                    + '</button></div>';
+            }
+        }
+
+        document.getElementById('modalBody').innerHTML =
+            suspWarn
+            + blBtn
+            + '<div class="modal-section">'
+            +   '<div class="modal-section-title"><i class="fas fa-user"></i> Patient Information</div>'
+            +   '<div class="info-grid">' + infoGrid + '</div>'
+            + '</div>'
+            + '<div class="modal-section">'
+            +   '<div class="modal-section-title"><i class="fas fa-hospital"></i> Assignment</div>'
+            +   '<div class="info-grid">' + assignGrid + '</div>'
+            + '</div>'
+            + '<div class="modal-section">'
+            +   '<div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Pickup Location</div>'
+            +   (req.pickup_address ? '<div style="font-size:.74rem;color:var(--text-muted);margin-bottom:8px;"><i class="fas fa-location-dot" style="color:#f87171;margin-right:4px;"></i>' + req.pickup_address + '</div>' : '')
+            +   mapHtml
+            + '</div>'
+            + '<div class="modal-section">'
+            +   '<div class="modal-section-title"><i class="fas fa-timeline"></i> Status Timeline</div>'
+            +   '<div class="timeline-list">' + tlHtml + '</div>'
+            + '</div>';
+
+        // Initialize Google Map if GPS available
+        if (hasGPS) {
+            setTimeout(function() {
+                var mapEl = document.getElementById('miniMap');
+                if (!mapEl) return;
+                if (_googleInfoWindow) { _googleInfoWindow.close(); }
+                _googleMap = null; _googleMarker = null; _googleInfoWindow = null;
+                var lat = parseFloat(req.latitude);
+                var lng = parseFloat(req.longitude);
+                _googleMap = new google.maps.Map(mapEl, {
+                    center: {lat: lat, lng: lng},
+                    zoom: 15,
+                    disableDefaultUI: false,
+                    scrollwheel: false
+                });
+                _googleMarker = new google.maps.Marker({
+                    position: {lat: lat, lng: lng},
+                    map: _googleMap,
+                    title: (req.patient_name || 'Patient'),
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#dc2626',
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 3
+                    }
+                });
+                _googleInfoWindow = new google.maps.InfoWindow({
+                    content: (req.patient_name || 'Patient') + '<br>' + (req.pickup_address || '')
+                });
+                _googleInfoWindow.open(_googleMap, _googleMarker);
+            }, 100);
+        }
+    })
+    .catch(function() {
+        document.getElementById('modalBody').innerHTML =
+            '<div class="modal-loading"><i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:1.5rem;"></i><span style="color:#dc2626;">Network error.</span></div>';
+    });
+}
+
+function infoRow(label, value, span) {
+    var isEmpty = !value || value === '—';
+    var style = span === 'full' ? 'grid-column:1/-1' : '';
+    return '<div class="info-row" style="' + style + '">'
+        + '<div class="ir-label">' + label + '</div>'
+        + '<div class="ir-value' + (isEmpty ? ' empty' : '') + '">' + (isEmpty ? '—' : value) + '</div>'
+        + '</div>';
+}
+
+function closeModal() {
+    document.getElementById('emergencyModal').classList.remove('open');
+    if (_googleInfoWindow) { _googleInfoWindow.close(); }
+    _googleMap = null; _googleMarker = null; _googleInfoWindow = null;
+}
+
+function closeModalOnBackdrop(e) {
+    if (e.target === document.getElementById('emergencyModal')) closeModal();
+}
+
+// ===== Blacklist actions =====
+function blacklistPhone(phone, name) {
+    var reason = prompt('Reason for blacklisting ' + phone + ' (' + name + '):\n(Leave blank for default reason)', 'Suspicious activity');
+    if (reason === null) return; // cancelled
+    fetch('/admin-api/blacklist', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({phone: phone, reason: reason || 'Flagged by administrator'})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.status === 'success') {
+            showToast('📵 ' + phone + ' has been blacklisted', 'error');
+            closeModal();
+        } else {
+            showToast('Failed: ' + (d.message || 'Unknown error'), 'error');
+        }
+    })
+    .catch(function() { showToast('Network error', 'error'); });
+}
+
+function unblacklistPhone(phone) {
+    if (!confirm('Remove ' + phone + ' from the blacklist?')) return;
+    fetch('/admin-api/unblacklist/' + encodeURIComponent(phone), {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.status === 'success') {
+            showToast('✅ ' + phone + ' removed from blacklist', 'success');
+            closeModal();
+        } else {
+            showToast('Failed: ' + (d.message || 'Unknown error'), 'error');
+        }
+    })
+    .catch(function() { showToast('Network error', 'error'); });
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
