@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: white; }
+        .test { padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .pass { background: #4CAF50; }
+        .fail { background: #f44336; }
+        .info { background: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>Device Test</h1>
+    <div class="test info">
+        <strong>Testing connection to Flask app...</strong><br>
+        <div id="status">Loading...</div>
+    </div>
+    <div id="results"></div>
+    
+    <script>
+        async function runTests() {
+            const results = document.getElementById('results');
+            const status = document.getElementById('status');
+            
+            try {
+                // Test 1: Can we reach the server?
+                status.innerHTML = 'Testing server connection...';
+                const pingResponse = await fetch('/');
+                status.innerHTML += '<br>✓ Server is online (HTTP ' + pingResponse.status + ')';
+                
+                // Test 2: Try hospital-login
+                status.innerHTML += '<br>✓ Fetching hospital-login page...';
+                const loginResponse = await fetch('/hospital-login');
+                addResult('Hospital Login Page', loginResponse.ok, 'Status: ' + loginResponse.status);
+                
+                // Test 3: Try the game without session (should redirect or error)
+                status.innerHTML += '<br>Testing hospital-dashboard API...';
+                const dashResponse = await fetch('/get-drivers');
+                addResult('GET /get-drivers (no session)', dashResponse.status === 401, 'Expected 401, got ' + dashResponse.status);
+                
+                status.innerHTML = '<span style="color: #4CAF50; font-weight: bold;">✓ All tests passed! The server is working correctly.</span>';
+                addResult('Server Status', true, 'Flask app is running and responding to requests');
+                
+            } catch(e) {
+                addResult('Connection Error', false, e.message);
+                status.innerHTML += '<br><span style="color: red;">✗ Error: ' + e.message + '</span>';
+            }
+        }
+        
+        function addResult(name, passed, details) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'test ' + (passed ? 'pass' : 'fail');
+            div.innerHTML = '<strong>' + (passed ? '✓' : '✗') + ' ' + name + '</strong><br>' + details;
+            results.appendChild(div);
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

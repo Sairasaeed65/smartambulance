@@ -1,0 +1,900 @@
+/* ================================================== */
+/*         SMARTAMBULANCE - MAIN STYLESHEET           */
+/*     AI-Driven Emergency Ambulance Routing          */
+/* ================================================== */
+
+/* ==================== DESIGN TOKENS ==================== */
+/* Color Variables for Consistency */
+:root {
+    --primary-dark: #0f1419;        /* Main dark background */
+    --secondary-dark: #1a2332;      /* Secondary dark background */
+    --accent-primary: #00d4ff;      /* Primary accent (cyan) */
+    --accent-secondary: #0066cc;    /* Secondary accent (blue) */
+    --alert-red: #ff0000;           /* Alert/Emergency red */
+    --text-primary: #e8eef7;        /* Primary text */
+    --text-secondary: #a0a8b8;      /* Secondary text */
+    --border-color: #2a3a52;        /* Border color */
+    
+    --transition-speed: 0.3s;       /* Standard transition speed */
+    --border-radius: 10px;          /* Standard border radius */
+}
+
+/* ==================== GLOBAL STYLES ==================== */
+/* Universal Box Sizing and Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* HTML Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Body Typography and Baseline */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--primary-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+}
+
+/* Headings Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* Utility Classes */
+.text-accent {
+    color: var(--accent-primary);
+}
+
+.text-red {
+    color: var(--alert-red);
+}
+
+/* Container Padding */
+.container-lg {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ==================== NAVIGATION ==================== */
+/* Navbar Styling - Professional Medical UI */
+.navbar {
+    background: #112031;
+    border-bottom: 2px solid #ef4444;
+    padding: 0;
+    z-index: 1030;
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-container {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Brand Logo and Text Container */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.3s ease;
+    padding: 0;
+    margin: 0;
+    flex-wrap: nowrap;
+}
+
+.navbar-brand:hover {
+    transform: none;
+}
+
+/* Override navbar-brand-spaced for new structure */
+.navbar-brand-spaced {
+    padding: 0;
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+/* ECG Heartbeat Icon */
+.navbar-ecg-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ECG Line Animation */
+@keyframes ecg {
+    0% {
+        stroke-dashoffset: 100;
+        opacity: 0.3;
+    }
+    50% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: -100;
+        opacity: 0.3;
+    }
+}
+
+/* Pulse Dot Animation */
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ecg-line {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: ecg 2s ease-in-out infinite;
+}
+
+.pulse-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Brand Group - Stacks brand name and tagline vertically */
+.navbar-brand-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0px;
+}
+
+/* Brand Text Container - Stacks Smart and Ambulance vertically */
+.navbar-brand-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0px;
+    line-height: 1.1;
+}
+
+.brand-smart {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.brand-ambulance {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: #ef4444;
+    font-style: italic;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+/* Tagline - Directly Below Brand Name */
+.navbar-tagline {
+    font-family: 'Georgia', serif;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 3px;
+    font-weight: 300;
+    text-transform: uppercase;
+    margin-top: 2px;
+    line-height: 1;
+}
+
+/* Navigation Links */
+.nav-link {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    margin: 0 0.75rem;
+    transition: all var(--transition-speed) ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--accent-primary) !important;
+}
+
+/* Navbar Navigation Items Container */
+.navbar-nav {
+    padding-right: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Navbar Collapse - Ensure right alignment */
+.navbar-collapse {
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+/* Home Link - Serif, Muted Gray */
+.nav-links-serif {
+    font-family: 'Georgia', serif;
+    font-weight: 400;
+    color: #ffffff !important;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    text-decoration: none !important;
+}
+
+.nav-links-serif:hover {
+    color: #ef4444 !important;
+}
+
+/* Login Button - Pill Shaped with Red Border */
+.nav-login-button {
+    font-family: 'Georgia', serif;
+    font-weight: 300;
+    color: #ffffff !important;
+    border: 1.5px solid #ef4444 !important;
+    border-radius: 20px;
+    padding: 7px 18px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    background: transparent !important;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.nav-login-button:hover {
+    background: rgba(239, 68, 68, 0.05) !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+/* User Icon in Login Button */
+.navbar-user-icon {
+    flex-shrink: 0;
+    stroke: #ef4444;
+}
+
+/* ==================== BUTTONS ==================== */
+/* Primary Button (Cyan) */
+.btn-primary,
+.btn-cyan {
+    background: var(--accent-primary);
+    color: var(--primary-dark);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-primary:hover,
+.btn-cyan:hover {
+    background: #00a8cc;
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 212, 255, 0.2);
+}
+
+/* Outline Button */
+.btn-outline-cyan {
+    border: 2px solid var(--accent-primary);
+    color: var(--accent-primary);
+    background: transparent;
+    font-weight: 600;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-outline-cyan:hover {
+    background: var(--accent-primary);
+    color: var(--primary-dark);
+}
+
+/* ==================== HERO SECTION ==================== */
+/* Hero Container */
+.hero-section {
+    background: 
+        radial-gradient(ellipse at center, rgba(220,30,30,0.15) 0%, transparent 70%),
+        rgba(8, 5, 5, 0.75),
+        url('https://images.unsplash.com/photo-1504386106331-3e4e71712b38?w=1600&q=80') center/cover;
+    background-attachment: fixed;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 20px 80px;
+    position: relative;
+}
+
+/* Hero Content Wrapper */
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Hero Title */
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+}
+
+/* Hero Subtitle */
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    line-height: 1.8;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Emergency Button */
+.btn-emergency {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: var(--alert-red);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    box-shadow: 
+        0 0 25px rgba(255, 0, 0, 0.7),
+        0 15px 50px rgba(255, 0, 0, 0.5);
+    transition: all var(--transition-speed) ease;
+    animation: pulseMinimal 2s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    position: relative;
+    outline: none;
+}
+
+/* Pulsing Rings around Emergency Button */
+.btn-emergency::before,
+.btn-emergency::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(220, 30, 30, 0.5);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulseRing 2s infinite;
+}
+
+.btn-emergency::after {
+    animation-delay: 0.7s;
+}
+
+.btn-emergency:hover {
+    transform: scale(1.15);
+    box-shadow: 
+        0 0 40px rgba(255, 0, 0, 0.9),
+        0 20px 60px rgba(255, 0, 0, 0.7);
+    border-color: #ffffff;
+}
+
+.btn-emergency:active {
+    transform: scale(0.95);
+    box-shadow: 
+        0 0 15px rgba(255, 0, 0, 0.7),
+        0 10px 30px rgba(255, 0, 0, 0.4);
+}
+
+/* Pulse Animation for Emergency Button */
+@keyframes pulseMinimal {
+    0% {
+        box-shadow: 
+            0 0 25px rgba(255, 0, 0, 0.7),
+            0 15px 50px rgba(255, 0, 0, 0.5);
+    }
+    50% {
+        box-shadow: 
+            0 0 40px rgba(255, 0, 0, 0.9),
+            0 15px 60px rgba(255, 0, 0, 0.7);
+    }
+    100% {
+        box-shadow: 
+            0 0 25px rgba(255, 0, 0, 0.7),
+            0 15px 50px rgba(255, 0, 0, 0.5);
+    }
+}
+
+/* Pulsing Ring Animation */
+@keyframes pulseRing {
+    0% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* ==================== FEATURES SECTION ==================== */
+/* Features Container */
+.features-section {
+    padding: 80px 20px;
+    background: var(--secondary-dark);
+}
+
+/* Section Header */
+.section-header {
+    margin-bottom: 3rem;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 3rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+/* Section Subtitle */
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Feature Box Card */
+.feature-box {
+    background: var(--primary-dark);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    transition: all var(--transition-speed) ease;
+    height: 100%;
+}
+
+.feature-box:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+}
+
+/* Feature Icon Container */
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin: 0 auto 1.5rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.feature-box:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+/* Feature Title */
+.feature-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* Feature Description */
+.feature-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* ==================== CTA SECTION ==================== */
+/* Call-to-Action Section */
+.cta-section {
+    padding: 100px 20px;
+    background: var(--primary-dark);
+    text-align: center;
+}
+
+/* CTA Content Wrapper */
+.cta-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* CTA Title */
+.cta-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 800;
+}
+
+/* CTA Subtitle */
+.cta-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* ==================== FOOTER ==================== */
+/* Footer Container */
+.footer {
+    background: #0a0e13;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Footer Content */
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60px;
+}
+
+/* Footer Text */
+.footer-text {
+    color: #7a8290;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+/* Tablet Breakpoint (768px and below) */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .cta-title {
+        font-size: 2rem;
+    }
+
+    .btn-emergency {
+        width: 160px;
+        height: 160px;
+        font-size: 1rem;
+    }
+
+    .hero-section {
+        padding: 100px 20px 60px;
+    }
+
+    .features-section {
+        padding: 60px 20px;
+    }
+
+    .cta-section {
+        padding: 80px 20px;
+    }
+}
+
+/* Mobile Breakpoint (576px and below) */
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .btn-emergency {
+        width: 140px;
+        height: 140px;
+        font-size: 0.9rem;
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.75rem;
+    }
+
+    .navbar {
+        padding: 0.75rem 0;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+}
+
+/* ==================== EMERGENCY BUTTON ANIMATIONS ==================== */
+
+/* Page fade-out animation */
+@keyframes pageOverlayFadeOut {
+    0% {
+        opacity: 0;
+        pointer-events: none;
+    }
+    100% {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* Emergency overlay when activated */
+.emergency-overlay-active {
+    animation: pageOverlayFadeOut 1.5s ease-in forwards reverse;
+}
+
+.emergency-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 20, 25, 0.95);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.emergency-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    animation: pageOverlayFadeOut 1.5s ease-in forwards;
+}
+
+/* Button color transition animation */
+@keyframes buttonColorTransition {
+    0% {
+        background: #dc3545;
+    }
+    100% {
+        background: #0d6efd;
+    }
+}
+
+/* Apply transition to emergency button */
+.btn-emergency.activating {
+    animation: buttonColorTransition 1.5s ease-in forwards;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* ==================== LOGIN MODAL STYLES ==================== */
+
+/* Login Button in Navbar */
+.navbar .nav-link[data-bs-target="#loginModal"] {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+    padding: 0.5rem 1rem !important;
+}
+
+.navbar .nav-link[data-bs-target="#loginModal"]:hover {
+    color: var(--accent-primary) !important;
+    transform: scale(1.05);
+}
+
+.navbar .nav-link[data-bs-target="#loginModal"] i {
+    transition: all var(--transition-speed) ease;
+}
+
+.navbar .nav-link[data-bs-target="#loginModal"]:hover i {
+    transform: translateX(2px);
+}
+
+.login-modal-content {
+    background: linear-gradient(135deg, var(--secondary-dark), var(--primary-dark));
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+}
+
+.login-modal-header {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 102, 204, 0.1));
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.login-modal-header .modal-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-modal-body {
+    padding: 2rem 1.5rem;
+}
+
+.login-modal-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.login-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-option-card {
+    display: flex;
+    align-items: center;
+    padding: 1.2rem 1rem;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 102, 204, 0.1));
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+    pointer-events: none;
+}
+
+.login-option-card:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--accent-primary);
+    transform: translateX(5px);
+}
+
+.login-option-card:hover::before {
+    opacity: 1;
+}
+
+.login-option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 212, 255, 0.15);
+    border-radius: 8px;
+    margin-right: 1rem;
+    color: var(--accent-primary);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.login-option-content {
+    flex: 1;
+}
+
+.login-option-title {
+    margin: 0 0 0.25rem 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.login-option-description {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.login-option-arrow {
+    color: var(--accent-primary);
+    opacity: 0.5;
+    transition: all var(--transition-speed) ease;
+}
+
+.login-option-card:hover .login-option-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+}
+
+.login-modal-footer {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.login-modal-footer .btn {
+    width: 100%;
+}
+
+.login-modal-footer .btn-secondary {
+    background: rgba(160, 168, 184, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: all var(--transition-speed) ease;
+}
+
+.login-modal-footer .btn-secondary:hover {
+    background: rgba(160, 168, 184, 0.2);
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* Responsive Modal */
+@media (max-width: 576px) {
+    .login-modal-content {
+        border-radius: 10px;
+    }
+
+    .login-modal-body {
+        padding: 1.5rem 1rem;
+    }
+
+    .login-option-card {
+        padding: 1rem;
+    }
+
+    .login-option-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.25rem;
+    }
+
+    .login-option-title {
+        font-size: 0.95rem;
+    }
+}
