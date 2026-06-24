@@ -1,5 +1,3 @@
-
-                
 """
 ================================================
     SMARTAMBULANCE - FLASK APPLICATION (MySQL)
@@ -62,28 +60,23 @@ def inject_maps_key():
     """Inject Google Maps API key into all templates automatically."""
     return {'GOOGLE_MAPS_KEY': GOOGLE_MAPS_API_KEY}
 
-
 # ==================== DATABASE CONFIGURATION ====================
-
-import os
-import mysql.connector
-from mysql.connector import Error
-
-DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
-DB_USER = os.environ.get('DB_USER', 'root')
+# Reads from environment variables — set these in Render dashboard
+# For local dev, put them in your .env file (loaded above via dotenv)
+DB_HOST     = os.environ.get('DB_HOST', 'localhost')
+DB_USER     = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
-DB_NAME = os.environ.get('DB_NAME', 'smartambulance')
-DB_PORT = int(os.environ.get('DB_PORT', 3306))
+DB_NAME     = os.environ.get('DB_NAME', 'smartambulance')
+DB_PORT     = int(os.environ.get('DB_PORT', 3306))
 
-_DB_CONFIG = {
-    "host": DB_HOST,
-    "user": DB_USER,
-    "password": DB_PASSWORD,
-    "database": DB_NAME,
-    "port": DB_PORT,
-    "connection_timeout": 10,
-}
+# Database connection pool
+_db_pool = None
 
+# Direct connection config (used as fallback when pool is exhausted)
+_DB_CONFIG = dict(
+    host=DB_HOST, user=DB_USER, password=DB_PASSWORD,
+    database=DB_NAME, port=DB_PORT, connection_timeout=10,
+)
 
 def _init_pool():
     """Create the shared MySQL connection pool (pool_size=10)."""
@@ -9224,4 +9217,6 @@ def start_background_tasks():
 
 if __name__ == '__main__':
     start_background_tasks()
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
