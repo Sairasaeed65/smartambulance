@@ -73,9 +73,14 @@ DB_PORT     = int(os.environ.get('DB_PORT', 3306))
 _db_pool = None
 
 # Direct connection config (used as fallback when pool is exhausted)
+# SSL enabled for Aiven — disabled automatically for localhost
+_USE_SSL = DB_HOST != 'localhost'
 _DB_CONFIG = dict(
     host=DB_HOST, user=DB_USER, password=DB_PASSWORD,
     database=DB_NAME, port=DB_PORT, connection_timeout=10,
+    ssl_disabled=not _USE_SSL,
+    ssl_verify_cert=False,
+    ssl_verify_identity=False,
 )
 
 def _init_pool():
